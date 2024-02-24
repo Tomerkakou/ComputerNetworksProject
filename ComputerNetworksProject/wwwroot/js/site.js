@@ -2,6 +2,7 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
+
 function highlightStars(star) {
     var rating = star.getAttribute("data-rating");
     var stars = document.querySelectorAll(".star");
@@ -29,7 +30,22 @@ function resetStars() {
     }
 }
 
-function selectStar(star) {
+async function selectStar(star,productId) {
     var rating = star.getAttribute("data-rating");
-    document.getElementById("rating").value = rating;
+    try {
+        const res = await fetch(`/products/AddRating?productId=${productId}&rate=${rating}`);
+        const newRate = await res.json();
+        const grandpa = star.parentNode.parentNode;
+        while (grandpa.firstChild) {
+            grandpa.removeChild(grandpa.firstChild);
+        }
+        var newSpan = document.createElement("span");
+        newSpan.appendChild(document.createTextNode("Thank you!"));
+        newSpan.classList.add("fw-bold");
+        grandpa.appendChild(newSpan);
+        document.getElementById(`product-${productId}-rate`).innerText = newRate;
+    } catch (err) {
+        console.log(err);
+    }
+
 }

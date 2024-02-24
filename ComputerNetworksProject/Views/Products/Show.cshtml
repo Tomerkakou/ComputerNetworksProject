@@ -1,0 +1,85 @@
+﻿@model ComputerNetworksProject.Data.Product
+
+@{
+    ViewData["Title"] = $"Product {Model.Id}";
+    ViewData["Products"] = "active";
+
+    string imgSrc = "";
+    if (Model.Img is not null && Model.ImgType is not null)
+    {
+        imgSrc = String.Format("data:image/{0};base64,{1}", Model.ImgType, Convert.ToBase64String(Model.Img));
+    }
+}
+<div class="d-flex justify-content-between">
+    <h1>@Model.Name</h1>
+    @if (User.IsInRole("Admin"))
+    {
+
+        <a asp-controller="Products" asp-action="Edit" asp-route-id="@Model.Id" class="pt-3 fs-3 text-dark text-opacity-50"><i class="bi bi-pencil-square"></i></a>
+    }
+</div>
+<hr />
+<div class="row fw-medium">
+    <div class="col-md-10">
+            <div class="row">
+                <div class="col-md-8 col-12 d-flex justify-content-center align-content-center h-100">
+                    @if (String.IsNullOrEmpty(imgSrc))
+                    {
+                    <img src="~/images/noImage.jpg" class="card-img-top img-thumbnail" alt="...">
+                    }
+                    else
+                    {
+                    <img src="@imgSrc" class="card-img-top img-thumbnail" alt="...">
+                    }
+                </div>
+                <div class="col-md-4 col-12 fs-5">
+                    <div>
+                        <span class="fw-bold me-2">Stock:</span>
+                        @Model.Stock
+                    </div>
+                    <div>
+                        <span class="fw-bold me-2">Available stock:</span>
+                        @Model.AvailableStock
+                    </div>
+                    <div>
+                        <span class="fw-bold me-2">Category:</span>
+                        @Model.Category.Name
+                    </div>
+                    <div>
+                        <span class="fw-bold me-2">Rate:</span>
+                        <span class="fs-5 fw-bold">@Model.Rate</span>
+                        <span class="ms-2" style="font-size: 2rem; color: #ffcc00;">&#9733;</span>
+                    </div>
+                    <div>
+                        <span class="fw-bold me-2">Price:</span>
+                        @if (Model.PriceDiscount is not null)
+                        {
+                            <span class="ms-auto">
+                                <span class="fw-light fs-6 text-decoration-line-through">
+                                    @Model.Price
+                                </span>
+                                <span class="ms-2 fs-5 fw-normal text-danger">
+                                    @Model?.PriceDiscount$
+                                </span>
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="ms-2 fs-5 fw-normal">
+                                @Model.Price$
+                            </span>
+                        }
+                    </div>
+                    <div class="d-flex">
+                        <span class="fw-bold me-2">Description:</span>
+                        <p>
+                            @Model.Description
+                        </p>   
+                    </div>
+                    
+                </div>
+            </div>
+    </div>
+</div>
+
+

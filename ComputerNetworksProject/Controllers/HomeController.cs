@@ -19,7 +19,8 @@ namespace ComputerNetworksProject.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var products = await _db.Products.ToListAsync();
+
+            var products = await _db.Products.Include(p => p.Rates).ToListAsync();
             HomeModel model = new HomeModel
             {
                 Products = products,

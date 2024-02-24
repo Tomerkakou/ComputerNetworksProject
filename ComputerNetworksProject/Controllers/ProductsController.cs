@@ -8,16 +8,34 @@ using Microsoft.EntityFrameworkCore;
 using ComputerNetworksProject.Data;
 using Microsoft.AspNetCore.Authorization;
 using System.Web;
+using ComputerNetworksProject.Data.Migrations;
 
 namespace ComputerNetworksProject.Controllers
 {
-    public class Products : Controller
+    public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _db;
 
-        public Products(ApplicationDbContext context)
+        public ProductsController(ApplicationDbContext context)
         {
             _db = context;
+        }
+
+        //Show product
+        public async Task<IActionResult> Show(int? id)
+        {
+            if (id == null || _db.Products == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _db.Products.Include(p => p.Category).Include(p=>p.Rates).FirstOrDefaultAsync(p => p.Id == id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
         }
 
         // GET: Products/Create
@@ -34,10 +52,14 @@ namespace ComputerNetworksProject.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(float price,float priceDiscount,string name,string description,int stars,int categortId ,IFormFile image)//[Bind("Id,Price,PriceDiscount,Name,Description,Stars,CategoryId,Img,ImgType")] Product product)
+        public async Task<IActionResult> Create(float price,float? priceDiscount,string name,string description,int categoryId ,IFormFile? image,int stock)//[Bind("Id,Price,PriceDiscount,Name,Description,Stars,CategoryId,Img,ImgType")] Product product)
         {
             try
             {
+                if (priceDiscount >= price)
+                {
+                    ModelState.AddModelError("PriceDiscount", "Must be lower than price");
+                }
                 if (image != null && image.Length > 0)
                 {
                     using (var memoryStream = new MemoryStream())
@@ -51,16 +73,18 @@ namespace ComputerNetworksProject.Controllers
                             Description = description,
                             Price = price,
                             PriceDiscount = priceDiscount,
-                            Stars = stars,
-                            CategoryId = categortId+1,
+                            CategoryId = categoryId,
                             ImgType = imageType,
-                            Img = imageD
+                            Img = imageD,
+                            Stock= stock,
+                            AvailableStock= stock,
                         };
                         if (ModelState.IsValid)
                         {
                             _db.Add(product);
                             await _db.SaveChangesAsync();
-                            return RedirectToAction(nameof(Index));
+                            TempData["success"] = $"Product {product.Name} created successfully!";
+                            return RedirectToAction(nameof(Create));
                         }
                         return View();
                     }
@@ -73,14 +97,16 @@ namespace ComputerNetworksProject.Controllers
                         Description = description,
                         Price = price,
                         PriceDiscount = priceDiscount,
-                        Stars = stars,
-                        CategoryId = categortId+1,
+                        CategoryId = categoryId,
+                        Stock = stock,
+                        AvailableStock = stock,
                     };
                     if (ModelState.IsValid)
                     {
                         _db.Add(product);
                         await _db.SaveChangesAsync();
-                        return RedirectToAction(nameof(Index));
+                        TempData["success"] = $"Product {product.Name} created successfully!";
+                        return RedirectToAction(nameof(Create));
                     }
                     return View();
                 }
@@ -115,15 +141,44 @@ namespace ComputerNetworksProject.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Price,PriceDiscount,Name,Description,Stars,CategoryId,Img,ImgType")] Product product)
+        public async Task<IActionResult> Edit(int id,float price, float? priceDiscount, string name, string description, int categoryId, IFormFile? image, int stock)
         {
-            if (id != product.Id)
+            var product = await _db.Products.FindAsync(id);
+            if(product == null)
             {
                 return NotFound();
             }
-
+            if (priceDiscount >= price)
+            {
+                ModelState.AddModelError("PriceDiscount", "Must be lower than price");
+            }
+            var orderedStock = product.Stock - product.AvailableStock;
+            if (stock < orderedStock)
+            {
+                ModelState.AddModelError("Stock", $"{orderedStock} items already ordered must be greater!");
+            }
+            bool sendNotify = product.Stock < stock;
             if (ModelState.IsValid)
             {
+                if (image != null && image.Length > 0)
+                {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        image.CopyTo(memoryStream);
+                        byte[] imageD = memoryStream.ToArray();
+                        string imageType = GetImageType(imageD);
+
+                        product.Img = imageD;
+                        product.ImgType= imageType; 
+                    }
+                }
+                product.Name = name;
+                product.Description = description;
+                product.Price = price;
+                product.PriceDiscount = priceDiscount;
+                product.AvailableStock= stock- orderedStock;
+                product.Stock = stock;
+                product.CategoryId = categoryId;
                 try
                 {
                     _db.Update(product);
@@ -140,7 +195,12 @@ namespace ComputerNetworksProject.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                if (sendNotify)
+                {
+                    //send email notifications
+                }
+                TempData["success"] = $"{name} updated successfully!";
+                return RedirectToAction(nameof(Show), new { id = id });
             }
             ViewData["CategoryId"] = new SelectList(_db.Categories, "Id", "Name", product.CategoryId);
             return View(product);
@@ -185,6 +245,27 @@ namespace ComputerNetworksProject.Controllers
             await _db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+        //adding rating to product    
+        public async Task<IActionResult> AddRating([FromQuery(Name = "productId")] int productId, [FromQuery(Name = "rate")]  int rate)
+        {
+            var product=await _db.Products.FindAsync(productId);
+            if (product == null) {
+                return NotFound();
+            }
+            await _db.Entry(product).Collection(p => p.Rates).LoadAsync();
+            if (product.Rates== null)
+            {
+                product.Rates = new List<Rate>();
+            }
+            product.Rates.Add(new Rate
+            {
+                ProductId = productId,
+                Stars = rate
+            });
+            product._rate = null;
+            _db.SaveChanges();
+            return Ok(product.Rate);
+        }
 
         private bool ProductExists(int id)
         {
@@ -216,5 +297,7 @@ namespace ComputerNetworksProject.Controllers
             // Default to unknown type
             return "unknown";
         }
+
+
     }
 }

@@ -30,6 +30,18 @@ namespace ComputerNetworksProject.Data
                 await userManager.CreateAsync(user, "Admin@123");
                 await userManager.AddToRoleAsync(user, Roles.Admin.ToString());
             }
+
+            var _db = service.GetService<ApplicationDbContext>();
+            var category = new Category
+            {
+                Id = 1,
+                Name = "Default",
+            };
+            if(await _db.Categories.FindAsync(1) is null)
+            {
+                _db.Categories.Add(category);
+                await _db.SaveChangesAsync();
+            }
         }
 
     }

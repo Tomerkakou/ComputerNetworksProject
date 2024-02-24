@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace ComputerNetworksProject.Data
 {
@@ -15,5 +16,20 @@ namespace ComputerNetworksProject.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Category> Categories { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Category>()
+                .HasIndex(c=> c.Name)
+                .IsUnique();
+
+            builder.Entity<Product>()
+                .HasOne(p => p.Category)
+                .WithMany()
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.NoAction);
+        }
     }
 }

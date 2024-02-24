@@ -1,27 +1,26 @@
-﻿@using ComputerNetworksProject.Data;
-@model HomeModel
+﻿@model HomeModel;
 @{
     ViewData["Title"] = "Home Page";
-}
-@if (Model.Products is null || !Model.Products.Any())
-{
-    <div>
-
-    </div>
+    ViewData["Home"] = "active";
 }
 <section>
     <div class="container">
         <div class="row">
         @foreach(var product in Model.Products){
-                string? imgSrc=null;
-                if (product.Img is not null && product.ImgType is not null)
+                if(product is null)
                 {
-                    var base64 = Convert.ToBase64String(product.Img);
-                    imgSrc = String.Format("data:image/{0};base64,{1}", product.ImgType, base64);
+                    continue;
                 }
+                string imgSrc = "";
+                if (product is not null && product?.Img is not null && product?.ImgType is not null)
+                {
+                imgSrc = String.Format("data:image/{0};base64,{1}", product?.ImgType, Convert.ToBase64String(product?.Img));
+                }
+
                 <div class="col-xl-3 col-md-4 col-sm-6 col-12 p-2">
                     <div class="card h-100 shadow">
-                        @if (imgSrc is null)
+                        <a asp-controller="Products" asp-action="Show" asp-route-id="@product.Id">
+                        @if (String.IsNullOrEmpty(imgSrc))
                         {
                             <img src="~/images/noImage.jpg" class="card-img-top img-fluid" alt="...">
                         }
@@ -29,39 +28,53 @@
                         {
                             <img src="@imgSrc" class="card-img-top" alt="...">
                         }
+                        </a>
                         <div class="card-body border-top d-flex flex-column">
                             <div class="d-flex justify-content-between">
-                                <h5 class="card-title">@product.Name</h5>
-                                @if(product.PriceDiscount is not null)
+                                <h5 class="card-title">@product?.Name</h5>
+                                @if(product?.PriceDiscount is not null)
                                 {
                                     <span class="ms-auto">
                                         <span class="fw-light fs-6 text-decoration-line-through">
-                                            @product.Price
+                                            @product?.Price
                                         </span>
-                                        <span class="ms-2 fs-5 fw-normal text-danger" >
-                                            @product.PriceDiscount$
+                                        <span class="ms-2 fs-5 fw-normal text-danger">
+                                            @product?.PriceDiscount$
                                         </span>
                                     </span>
                                 }
                                 else
                                 {
-                                   <span class="ms-2 fs-5 fw-normal" >
-                                        @product.Price$
-                                   </span> 
+                                    <span class="ms-2 fs-5 fw-normal" >
+                                        @product?.Price$
+                                    </span> 
                                 }
                             </div>
-                            <p class="card-text">@product.Description</p>
-                            <div class="star-rating mt-auto ms-auto me-auto" onmouseleave="resetStars()">
-                                <span class="star" data-rating="1" onmouseover="highlightStars(this)" onclick="selectStar(this)">&#9733;</span>
-                                <span class="star" data-rating="2" onmouseover="highlightStars(this)" onclick="selectStar(this)">&#9733;</span>
-                                <span class="star" data-rating="3" onmouseover="highlightStars(this)" onclick="selectStar(this)">&#9733;</span>
-                                <span class="star" data-rating="4" onmouseover="highlightStars(this)" onclick="selectStar(this)">&#9733;</span>
-                                <span class="star" data-rating="5" onmouseover="highlightStars(this)" onclick="selectStar(this)">&#9733;</span>
-                                <input  type="hidden" id="rating" value="0" />
+                            <p class="card-text">
+                                
+                                <div>
+                                <span class="fs-5 fw-bold" id="product-@product.Id-rate">@product.Rate</span>
+                                <span class="ms-2 pt-2" style="font-size: 2rem; color: #ffcc00;">&#9733;</span>
+                                </div>
+                                @if (product.AvailableStock <= 3)
+                                {
+                                    <div class="text-danger">
+                                        Only @product.AvailableStock left!
+                                    </div>
+                                }
+                            </p>
+                            <div class="mt-auto ms-auto me-auto">
+                                <div class="star-rating mt-auto ms-auto me-auto" onmouseleave="resetStars()">
+                                    <span class="star" data-rating="1" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)">&#9733;</span>
+                                    <span class="star" data-rating="2" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)">&#9733;</span>
+                                    <span class="star" data-rating="3" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)">&#9733;</span>
+                                    <span class="star" data-rating="4" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)">&#9733;</span>
+                                    <span class="star" data-rating="5" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)">&#9733;</span>
+                                    <input  type="hidden" id="rating" value="0" />
+                                </div>
                             </div>
                         </div>
-                        <div class="card-footer text-body-secondary">
-                            
+                        <div class="card-footer text-body-secondary">   
                             <a href="#" class="btn btn-primary">Go somewhere</a>
                         </div>
                     </div>
@@ -70,3 +83,4 @@
         </div>
     </div>
 </section>
+

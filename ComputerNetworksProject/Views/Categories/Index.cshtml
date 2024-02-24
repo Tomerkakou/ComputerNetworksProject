@@ -1,0 +1,69 @@
+﻿@model ComputerNetworksProject.Models.CategoriesModel
+
+@{
+    ViewData["Title"] = "Categories";
+    ViewData["Categories"] = "active";
+}
+
+<h1>Categories</h1>
+<hr />
+<div class="row fw-medium">
+    <div class="col-md-10">
+        <div class="row">
+            <div class="col-md-8 col-12 d-flex justify-content-center align-content-center h-100 p-3 fw-bold">
+                <ul class="list-group w-100">
+                    @foreach(var category in Model.Categories)
+                    {
+                        <li class="list-group-item d-flex">
+                            @category.Name
+                            <span onclick="deleteCat(@category.Id)"  data-bs-toggle="modal" data-bs-target="#confirmModal" class="text-danger ms-auto"><i class="bi bi-x-lg"></i></span>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div class="col-md-4 col-12">
+                <form asp-action="Index">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="row">
+                        <div class="mb-2">
+                            <label asp-for="Input.Name" class="form-label fs-5">Category Name:</label>
+                            <input asp-for="Input.Name" class="form-control" />
+                            <span asp-validation-for="Input.Name" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mb-2 d-grid">
+                        <input type="submit" value="Create" class="btn btn-primary btn-block" />
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="confirmModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Are you sure?</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                All products related to that category will update to Default category
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancell</button>
+                <a type="button" id="modellink" href="" class="btn btn-primary">Understood</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function deleteCat(categoryId) {
+        var link = document.getElementById("modellink");
+        link.href = `/Categories/Delete/${categoryId}`;
+    }
+</script>
