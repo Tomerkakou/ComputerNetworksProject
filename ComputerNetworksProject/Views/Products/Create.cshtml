@@ -1,0 +1,67 @@
+﻿@model ComputerNetworksProject.Data.Product
+
+@{
+    ViewData["Title"] = "Create Product";
+}
+
+<h1>Create Product</h1>
+<hr />
+<div class="row fw-medium">
+    <div class="col-md-10">
+        <form asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="row">
+                <div class="col-md-6 mb-2">
+                    <label asp-for="Name" class="form-label">Name:</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-2 pt-4">
+                    <div class="star-rating" onmouseleave="resetStars()">
+                        <span class="star" data-rating="1" onmouseover="highlightStars(this)" onclick="selectStar(this)">&#9733;</span>
+                        <span class="star" data-rating="2" onmouseover="highlightStars(this)" onclick="selectStar(this)">&#9733;</span>
+                        <span class="star" data-rating="3" onmouseover="highlightStars(this)" onclick="selectStar(this)">&#9733;</span>
+                        <span class="star" data-rating="4" onmouseover="highlightStars(this)" onclick="selectStar(this)">&#9733;</span>
+                        <span class="star" data-rating="5" onmouseover="highlightStars(this)" onclick="selectStar(this)">&#9733;</span>
+                        <input asp-for="Stars" type="hidden" id="rating" value="0" />
+                    </div>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label asp-for="Price" class="form-label">Price:</label>
+                    <input asp-for="Price" class="form-control" />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label asp-for="PriceDiscount" class="form-label">Price after discount:</label>
+                    <input asp-for="PriceDiscount" class="form-control" />
+                    <span asp-validation-for="PriceDiscount" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-12 mb-2">
+                    <label asp-for="Description" class="form-label">Description:</label>
+                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-12 mb-2">
+                    <label asp-for="CategoryId" class="form-label">Select Category:</label>
+                    <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId"></select>
+                </div>
+
+                <div class="col-md-12 input-group mb-3">
+                    <label class="input-group-text"><i class="bi bi-image"></i></label>
+                    <input name="Image" type="file" accept="image/*" class="form-control" />
+                </div>
+            </div>
+
+            <div class="col-md-12 mb-2 d-grid">
+                <input type="submit" value="Create" class="btn btn-primary btn-block" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

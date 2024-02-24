@@ -11,5 +11,7 @@ namespace ComputerNetworksProject.Data
         public string? LastName { get; set; }
         public byte[]? ProfilePicture { get; set; }
         public string? ImgType { get; set; }
+
+        public ICollection<Payment>? Payments { get; set; }
     }
 }

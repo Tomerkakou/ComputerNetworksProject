@@ -1,5 +1,7 @@
-﻿using ComputerNetworksProject.Models;
+﻿using ComputerNetworksProject.Data;
+using ComputerNetworksProject.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace ComputerNetworksProject.Controllers
@@ -7,15 +9,22 @@ namespace ComputerNetworksProject.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly ApplicationDbContext _db;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger,ApplicationDbContext db)
         {
             _logger = logger;
+            _db = db;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var products = await _db.Products.ToListAsync();
+            HomeModel model = new HomeModel
+            {
+                Products = products,
+            };
+            return View(model);
         }
 
         public IActionResult Privacy()

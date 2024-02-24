@@ -13,9 +13,16 @@
 </head>
 <body class="bg-light bg-gradient">
     <header class="p-3">
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar sticky-top navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ComputerNetworksProject</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">CoCart</a>
+                <span role="button" class="position-relative me-4" data-bs-toggle="offcanvas" data-bs-target="#cartoffcanvas">
+                    <i class="bi bi-cart3 me-2 fs-4"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger mt-2" style"font-size: 4px;">
+                        10
+                        <span class="visually-hidden">unread messages</span>
+                    </span>
+                </span>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -25,17 +32,27 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        <li class="nav-item dropdown">
+                          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Products
+                          </a>
+                          <ul class="dropdown-menu">
+                            <li><a asp-controller="Products" asp-action="Create" class="dropdown-item">Create</a></li>
+                                <li><a asp-controller="Products" asp-action="Edit" class="dropdown-item">Edit</a></li>
+                          </ul>
                         </li>
+
                     </ul>
+                    <hr className="border-2"/>
                     <partial name="_LoginPartial" />
+                    
                 </div>
             </div>
         </nav>
     </header>
     <div class="container ">
         <main role="main" class="pb-3">
+            <partial name="_CartPartial" />
             @RenderBody()
         </main>
     </div>
