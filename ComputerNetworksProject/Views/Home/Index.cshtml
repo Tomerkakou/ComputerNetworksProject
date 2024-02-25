@@ -4,9 +4,83 @@
     ViewData["Home"] = "active";
 }
 <section>
+    <div class="accordion accordion-flush" id="filter-accordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed fw-bold fs-6" type="button" data-bs-toggle="collapse" data-bs-target="#filter-body">
+                    Filter
+                </button>
+            </h2>
+            <div id="filter-body" class="accordion-collapse collapse" data-bs-parent="#filter-accordion">
+                <div class="accordion-body">
+                    <div class="container">
+                        <form asp-action="Index">
+                            <input asp-for="@Model.ActivePage" type="hidden" value="@Model.ActivePage">
+                            <div class="row fw-semibold gy-1">
+                                <div class="col-md-4 col-sm-12">
+                                    <label asp-for="FilterInput.Search" class="form-label">Search:</label>
+                                    <input asp-for="FilterInput.Search" class="form-control" />
+                                    <span asp-validation-for="FilterInput.Search" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-4 col-sm-6 pt-4">
+                                    <input asp-for="FilterInput.OnlySale" class="form-check-input" id="onlysale" type="checkbox" />
+                                    <label asp-for="FilterInput.OnlySale" class="form-check-label" for="onlysale">Only items on sale</label>
+                                    <span asp-validation-for="FilterInput.Search" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-4 col-sm-6">
+                                    <label asp-for="FilterInput.CategoryId" class="form-label">Category:</label>
+                                    <select asp-for="FilterInput.CategoryId" class="form-select" asp-items="@ViewBag.CategoryId"></select>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label asp-for="FilterInput.StartPrice" class="form-label">Start Price:</label>
+                                    <input asp-for="FilterInput.StartPrice" class="form-control" />
+                                    <span asp-validation-for="FilterInput.StartPrice" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label asp-for="FilterInput.EndPrice" class="form-label">End Price:</label>
+                                    <input asp-for="FilterInput.EndPrice" class="form-control" />
+                                    <span asp-validation-for="FilterInput.EndPrice" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label asp-for="FilterInput.StartDate" class="form-label">Start Date:</label>
+                                    <input asp-for="FilterInput.StartDate" class="form-control" />
+                                    <span asp-validation-for="FilterInput.StartDate" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label asp-for="FilterInput.EndDate" class="form-label">End Price:</label>
+                                    <input asp-for="FilterInput.EndDate" class="form-control" />
+                                    <span asp-validation-for="FilterInput.EndDate" class="text-danger"></span>
+                                </div>
+                                <div class="col-12"> 
+                                    <label asp-for="FilterInput.Rate" class="form-label">Products Rate: 
+                                            <span class="fs-5 fw-bold ms-1" id="filter-rate">2.5</span>
+                                            <span class="ms-2" style="font-size: 2rem; color: #ffcc00;">&#9733;</span>
+                                    </label>
+                                    <input asp-for="FilterInput.Rate" type="range" oninput="updateValue(this.value)" class="form-range" min="0" max="5" step="0.1" id="RateRange">
+                                    <script>
+                                        function updateValue(value) {
+                                            document.getElementById('filter-rate').innerText = value;
+                                        }
+                                    </script>
+                                </div>
+                                <div class="col-md-6 col-sm-12 d-grid">
+                                    <button class="btn btn-outline-primary">Apply Filters</button>
+                                </div>
+                                <div class="col-md-6 col-sm-12 d-grid">
+                                    <button class="btn btn-outline-secondary">Reset Filters</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section>
     <div class="container">
         <div class="row">
-        @foreach(var product in Model.Products){
+            @foreach (var product in Model.ProductsInPage)
+            {
                 if(product is null)
                 {
                     continue;
@@ -50,19 +124,23 @@
                                     </span> 
                                 }
                             </div>
-                            <p class="card-text">
-                                
-                                <div>
+                            <div>
                                 <span class="fs-5 fw-bold" id="product-@product.Id-rate">@product.Rate</span>
-                                <span class="ms-2 pt-2" style="font-size: 2rem; color: #ffcc00;">&#9733;</span>
+                                <span class="ms-2" style="font-size: 2rem; color: #ffcc00;">&#9733;</span>
+                            </div>
+                            @if (product.AvailableStock <= 3)
+                            {
+                                <div class="text-danger">
+                                    Only @product.AvailableStock left!
                                 </div>
-                                @if (product.AvailableStock <= 3)
-                                {
-                                    <div class="text-danger">
-                                        Only @product.AvailableStock left!
-                                    </div>
-                                }
-                            </p>
+                            }
+                            else
+                            {
+                                <div>
+                                    @product.AvailableStock in stock
+                                </div>
+                            }
+
                             <div class="mt-auto ms-auto me-auto">
                                 <div class="star-rating mt-auto ms-auto me-auto" onmouseleave="resetStars()">
                                     <span class="star" data-rating="1" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)">&#9733;</span>
@@ -81,6 +159,43 @@
                 </div>
         }
         </div>
+        <hr />
+        <div class="row">
+            <nav aria-label="Page navigation example">
+                @{
+                    var prev = Model.ActivePage-1;
+                    var pDisabled = prev < 1 ? "disabled" :"";
+                    var succ = Model.ActivePage + 1;
+                    var sDisabled = !Model.ShowPages.Contains(succ) ? "disabled" :"";
+                }
+                <ul class="pagination justify-content-center fs-6 fw-semibold">
+                    <li class="page-item @pDisabled">
+                        
+                        <a asp-controller="Home" asp-action="Index" asp-route-page="@prev" class="page-link">
+                            <span>&laquo;</span>
+                        </a>
+                    </li>
+                    @foreach (var pageNum in Model.ShowPages)
+                    {
+                        var active = pageNum == Model.ActivePage ? "active" : "";
+                        <li class="page-item @active">
+                            <a asp-controller="Home" asp-action="Index" asp-route-page="@pageNum" class="page-link">@pageNum</a>
+                        </li>
+                    }
+                    <li class="page-item @sDisabled">
+                        <a asp-controller="Home" asp-action="Index" asp-route-page="@succ" class="page-link">
+                            <span>&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </div>
 </section>
 
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

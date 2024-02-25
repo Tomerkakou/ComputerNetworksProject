@@ -29,6 +29,8 @@ builder.Services.Configure <EmailSettings>
 
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
 
+builder.Services.AddSession(options=>options.IdleTimeout=TimeSpan.FromMinutes(60));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -46,6 +48,7 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseSession();
 app.UseRouting();
 
 app.UseAuthentication();

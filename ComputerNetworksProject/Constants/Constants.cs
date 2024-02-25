@@ -5,7 +5,8 @@
         Admin,
         User
     }
-    public class Constants
+    public class Constant
     {
+        public static readonly int PageSize = 2;
     }
 }
