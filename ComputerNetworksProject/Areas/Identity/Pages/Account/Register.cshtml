@@ -18,22 +18,25 @@
                                 <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
                                     <div class="row gy-2 overflow-hidden">
                                         <div class="col-12">
-                                            <div class="input-group mb-3">
+                                            <div class="input-group mb-2">
                                                 <span class="input-group-text"><i class="bi bi-at"></i></span>
-                                                    <input asp-for="Input.Email" class="form-control" placeholder="Email">
-                                                    <span asp-validation-for="Input.Email" class="text-danger pt-1"></span>
-                                                </div>
+                                                <input asp-for="Input.Email" class="form-control" placeholder="Email">
                                             </div>
+                                            <span asp-validation-for="Input.Email" class="text-danger pt-1"></span>
+                                        </div>
                                         <div class="col-6">
-                                            <div class="input-group mb-3">
+                                            <div class="input-group mb-2">
                                                 <span class="input-group-text"><i class="bi bi-key"></i></span>
-                                                <input asp-for="Input.Password" class="form-control" placeholder="Password">
+                                                <input asp-for="Input.Password" class="form-control" placeholder="Password" oninput="checkPasswordStrength(this)">
                                                 <span class="btn btn-outline-secondary" onclick="showPassword(this)"><i class="bi bi-eye-fill"></i></span>
+                                            </div>
+                                            <div class="progress d-none" role="progressbar" style="height: 8px"  >
+                                                <div id="password-strength-bar" class="progress-bar bg-danger" style="width: 100%"></div>
                                             </div>
                                             <span asp-validation-for="Input.Password" class="text-danger pt-1"></span>
                                         </div>
                                         <div class="col-6">
-                                            <div class="input-group mb-3">
+                                            <div class="input-group mb-2">
                                                 <span class="input-group-text"><i class="bi bi-key"></i></span>
                                                 <input asp-for="Input.ConfirmPassword" class="form-control" placeholder="Confirm Password">
                                                 <span class="btn btn-outline-secondary" onclick="showPassword(this)"><i class="bi bi-eye-fill"></i></span>
@@ -42,11 +45,11 @@
                                         </div>
                                         <div class="col-6">
                                                 <input asp-for="Input.FirstName" class="form-control" placeholder="First name">
-                                                <span asp-validation-for="Input.FirstName" class="text-danger pt-1"></span>
+                                                <span asp-validation-for="Input.FirstName" class="text-danger mt-2"></span>
                                         </div>
                                         <div class="col-6">
                                                 <input asp-for="Input.LastName" class="form-control" placeholder="Last name">
-                                                <span asp-validation-for="Input.LastName" class="text-danger pt-1"></span>
+                                                <span asp-validation-for="Input.LastName" class="text-danger mt-"></span>
                                         </div>
                                         <div class="col-12">
                                             <div class="d-grid my-3">

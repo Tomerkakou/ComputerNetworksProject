@@ -21,7 +21,10 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultUI()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddPasswordValidator<UsernameAsPasswordValidator>();
+
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.Configure <EmailSettings>

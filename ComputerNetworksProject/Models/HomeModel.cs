@@ -73,6 +73,7 @@ namespace ComputerNetworksProject.Models
 
         public class Filter
         {
+
             public string? Search { get; set; }
             [Range(1,5)]
             public float? Rate { get; set; }

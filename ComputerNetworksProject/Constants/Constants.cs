@@ -7,6 +7,6 @@
     }
     public class Constant
     {
-        public static readonly int PageSize = 2;
+        public static readonly int PageSize = 6;
     }
 }
