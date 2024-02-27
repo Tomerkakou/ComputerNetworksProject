@@ -19,7 +19,13 @@
                             <div class="row fw-semibold gy-1">
                                 <div class="col-md-5 col-sm-12">
                                     <label asp-for="FilterInput.Search" class="form-label">Search:</label>
-                                    <input asp-for="FilterInput.Search" class="form-control" />
+                                    <input asp-for="FilterInput.Search" list="datalistOptions" class="form-control" placeholder="Type to search..." />
+                                    <datalist id="datalistOptions" style="height:5.1em;overflow:hidden">
+                                        @foreach(var product in Model.Products)
+                                        {
+                                            <option value="@product.Name"/>
+                                        }
+                                    </datalist>
                                     <span asp-validation-for="FilterInput.Search" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-2 col-sm-4 pt-4">
@@ -31,25 +37,36 @@
                                     <label asp-for="FilterInput.CategoryId" class="form-label">Category:</label>
                                     <select asp-for="FilterInput.CategoryId" class="form-select" asp-items="@ViewBag.CategoryId"></select>
                                 </div>
-                                <div class="col-md-4 col-sm-6">
+                                <div class="col-md-3 col-sm-6">
                                     <label asp-for="FilterInput.StartPrice" class="form-label">Start Price:</label>
                                     <input asp-for="FilterInput.StartPrice" class="form-control" />
                                     <span asp-validation-for="FilterInput.StartPrice" class="text-danger"></span>
                                 </div>
-                                <div class="col-md-4 col-sm-6">
+                                <div class="col-md-3 col-sm-6">
                                     <label asp-for="FilterInput.EndPrice" class="form-label">End Price:</label>
                                     <input asp-for="FilterInput.EndPrice" class="form-control" />
                                     <span asp-validation-for="FilterInput.EndPrice" class="text-danger"></span>
                                 </div> 
-                                <div class="col-md-4 col-sm-12">
-                                    <label class="form-label">Date Range:</label>
-                                    <input name="FilterDate" type="text" class="form-control" value=""/>
-                                    <input asp-for="FilterInput.StartDate"  class="visually-hidden"/>
-                                    <input asp-for="FilterInput.EndDate" class="visually-hidden" />
+                                <div class="col-md-3 col-sm-12">
+                                    @{/*
+                                        <label class="form-label">Date Range:</label>
+                                        <input name="FilterDate" type="text" class="form-control"/>
+                                        <input asp-for="FilterInput.StartDate"  class="visually-hidden"/>
+                                        <input asp-for="FilterInput.EndDate" class="visually-hidden" />
+                                        */
+                                    }
+                                    <label asp-for="FilterInput.StartDate" class="form-label">Start Date:</label>
+                                    <input asp-for="FilterInput.StartDate" class="form-control" />
+                                    <span asp-validation-for="FilterInput.StartDate" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-12">                                 
+                                    <label asp-for="FilterInput.EndDate" class="form-label">End Date:</label>
+                                    <input asp-for="FilterInput.EndDate" class="form-control" />
+                                    <span asp-validation-for="FilterInput.EndDate" class="text-danger"></span>
                                 </div>
                                 <div class="col-12"> 
                                     <label asp-for="FilterInput.Rate" class="form-label">Products Rate: 
-                                            <span class="fs-5 fw-bold ms-1" id="filter-rate">2.5</span>
+                                            <span class="fs-5 fw-bold ms-1" id="filter-rate">@Model.FilterInput.Rate</span>
                                             <span class="ms-2" style="font-size: 2rem; color: #ffcc00;">&#9733;</span>
                                     </label>
                                     <input asp-for="FilterInput.Rate" type="range" oninput="updateValue(this.value)" class="form-range" min="0" max="5" step="0.1" id="RateRange">
@@ -63,7 +80,7 @@
                                     <button class="btn btn-outline-primary">Apply Filters</button>
                                 </div>
                                 <div class="col-md-6 col-sm-12 d-grid">
-                                    <button class="btn btn-outline-secondary">Reset Filters</button>
+                                    <a asp-controller="Home" asp-action="ResetFilter" class="btn btn-outline-secondary">Reset Filters</a>
                                 </div>
                             </div>
                         </form>
@@ -73,71 +90,71 @@
         </div>
     </div>
 </section>
-<section class="px-3">
+
+
+    <section class="px-3">
     <div class="container-fluid">
-        <div class="row">
+            <div class="row">
+
             @foreach (var product in Model.ProductsInPage)
-            {
-                if(product is null)
                 {
-                    continue;
+                if(product is null)
+                    {
+                continue;
                 }
                 string imgSrc = "";
                 if (product is not null && product?.Img is not null && product?.ImgType is not null)
-                {
-                imgSrc = String.Format("data:image/{0};base64,{1}", product?.ImgType, Convert.ToBase64String(product?.Img));
+                    {
+                    imgSrc = String.Format("data:image/{0};base64,{1}", product?.ImgType, Convert.ToBase64String(product?.Img));
                 }
 
                 <div class="col-xxl-2 col-lg-3 col-md-4 col-sm-6 col-12 p-2">
-                    <div class="">
-                        <div class="card h-50 shadow" >
+                        <div class="">
+                        <div class="card rounded-0 h-50 shadow" >
+                            
+                            <a asp-controller="Products" asp-action="Show" asp-route-id="@product.Id" class="tomer">
 
-                            <a asp-controller="Products" asp-action="Show" asp-route-id="@product.Id">
-                            @if (String.IsNullOrEmpty(imgSrc))
-                            {
-                                    <img src="~/images/noImage.jpg" class="card-img-top img-thumbnail" alt="...">
-                            }
-                            else
-                            {
-                                    <img src="@imgSrc" class="card-img-top img-thumbnail" alt="...">
-                            }
+                                <img src="@imgSrc" class="card-img-top" alt="...">
+
                             </a>
+
+                            
                             <div class="card-body border-top d-flex flex-column">
                                 <div class="d-flex justify-content-between">
                                     <h5 class="card-title">@product?.Name</h5>
                                     @if(product?.PriceDiscount is not null)
-                                    {
-                                        <span class="ms-auto">
+                                        {
+                                            <span class="ms-auto">
                                             <span class="fw-light fs-6 text-decoration-line-through">
-                                                @product?.Price
+                                            @product?.Price
                                             </span>
                                             <span class="ms-2 fs-5 fw-normal text-danger">
-                                                @product?.PriceDiscount$
-                                            </span>
+                                            @product?.PriceDiscount$
                                         </span>
+                                    </span>
                                     }
                                     else
-                                    {
+                                        {
                                         <span class="ms-2 fs-5 fw-normal" >
-                                            @product?.Price$
-                                        </span> 
-                                    }
+                                        @product?.Price$
+                                    </span>
+                                }
                                 </div>
-                                <div>
+                                    <div>
                                     <span class="fs-5 fw-bold" id="product-@product.Id-rate">@product.Rate</span>
                                     <span class="ms-2" style="font-size: 2rem; color: #ffcc00;">&#9733;</span>
                                 </div>
                                 @if (product.AvailableStock <= 3)
-                                {
+                                    {
                                     <div class="text-danger">
                                         Only @product.AvailableStock left!
-                                    </div>
+                                </div>
                                 }
                                 else
-                                {
-                                    <div>
+                                    {
+                                        <div>
                                         @product.AvailableStock in stock
-                                    </div>
+                                </div>
                                 }
 
                                 <div class="mt-auto ms-auto me-auto">
@@ -148,21 +165,21 @@
                                         <span class="star" data-rating="4" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)">&#9733;</span>
                                         <span class="star" data-rating="5" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)">&#9733;</span>
                                         <input  type="hidden" id="rating" value="0" />
-                                    </div>
                                 </div>
                             </div>
-                            <div class="card-footer text-body-secondary">   
-                                <a href="#" class="btn btn-primary">Go somewhere</a>
                             </div>
+                            <div class="card-footer text-body-secondary">
+                                <a href="#" class="btn btn-primary">Go somewhere</a>
                         </div>
                     </div>
                 </div>
+        </div>
         }
         </div>
         <hr />
-        <div class="row">
+            <div class="row">
             <nav aria-label="Page navigation example">
-                @{
+                    @{
                     var prev = Model.ActivePage-1;
                     var pDisabled = prev < 1 ? "disabled" :"";
                     var succ = Model.ActivePage + 1;
@@ -170,67 +187,33 @@
                 }
                 <ul class="pagination justify-content-center fs-6 fw-semibold">
                     <li class="page-item @pDisabled">
-                        
+
                         <a asp-controller="Home" asp-action="Index" asp-route-page="@prev" class="page-link">
-                            <span>&laquo;</span>
-                        </a>
+                        <span>&laquo;</span>
+                    </a>
                     </li>
                     @foreach (var pageNum in Model.ShowPages)
-                    {
+                        {
                         var active = pageNum == Model.ActivePage ? "active" : "";
                         <li class="page-item @active">
                             <a asp-controller="Home" asp-action="Index" asp-route-page="@pageNum" class="page-link">@pageNum</a>
-                        </li>
+                    </li>
                     }
                     <li class="page-item @sDisabled">
                         <a asp-controller="Home" asp-action="Index" asp-route-page="@succ" class="page-link">
-                            <span>&raquo;</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
+                        <span>&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </div>
-</section>
+            </div>
+    </section>
 
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
-        <script>
-            const start = $('input[name="FilterInput.StartDate"]').val()
-            const end = $('input[name="FilterInput.EndDate"]').val()
-            locale = {
-                "format": "DD/MM/YYYY",
-                "separator": " - ",
-                "applyLabel": "Apply",
-                "cancelLabel": "Clear",
-            }
-            if(start != ''){
-                locale.startDate = start
-            }
-            if (start != '') {
-                locale.endDate = end
-            }
-            $('input[name="FilterDate"]').daterangepicker({
-                "locale": locale,
-                "autoUpdateInput":false,
-                "parentEl": "filter-body",
-                "opens": "center",
-                "cancelClass": "btn btn-secondary"
-            }, function (start, end, label) {
-                $('input[name="FilterInput.StartDate"]').val(start.format('YYYY-MM-DDTHH:mm'))
-                $('input[name="FilterInput.EndDate"]').val(end.format('YYYY-MM-DDTHH:mm'))
-            });
-            $('input[name="FilterDate"]').on('apply.daterangepicker', function (ev, picker) {
-                $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-                $('input[name="FilterInput.StartDate"]').val(picker.startDate.format('YYYY-MM-DDTHH:mm'))
-                $('input[name="FilterInput.EndDate"]').val(picker.endDate.format('YYYY-MM-DDTHH:mm'))
-            });
-
-            $('input[name="FilterDate"]').on('cancel.daterangepicker', function (ev, picker) {
-                $(this).val('');
-            });
-        </script>
+        <script src="~/js/Home/Index.js"></script>
     }
 }

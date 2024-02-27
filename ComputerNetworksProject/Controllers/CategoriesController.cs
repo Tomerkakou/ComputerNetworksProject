@@ -1,5 +1,4 @@
-﻿using ComputerNetworksProject.Constants;
-using ComputerNetworksProject.Data;
+﻿using ComputerNetworksProject.Data;
 using ComputerNetworksProject.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,14 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ComputerNetworksProject.Controllers
 {
-    public class CategoriesController : Controller
+    public class CategoriesController(ApplicationDbContext context) : Controller
     {
-        private readonly ApplicationDbContext _db;
+        private readonly ApplicationDbContext _db = context;
 
-        public CategoriesController(ApplicationDbContext context)
-        {
-            _db = context;
-        }
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
@@ -37,10 +32,10 @@ namespace ComputerNetworksProject.Controllers
             {
                 return NotFound();
             }
-            if (_db.Categories.Where(c => c.Name == data.Input.Name).Any())
-            {
-                ModelState.AddModelError("Input.Name", "Category name must be unique!");
-            }
+            //if (_db.Categories.Where(c => c.Name == data.Input.Name).Any())
+            //{
+            //    ModelState.AddModelError("Input.Name", "Category name must be unique!");
+            //}
             if (ModelState.IsValid)
             {
                 try
@@ -56,7 +51,7 @@ namespace ComputerNetworksProject.Controllers
                     TempData["info"] = $"{data.Input.Name} added successfully!";
                     return View(model);
                 }
-                catch (Exception ex)
+                catch
                 {
                     TempData["Error"] = "Error have occured please try deleting again!";
                 }

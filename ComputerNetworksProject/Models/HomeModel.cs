@@ -2,6 +2,7 @@
 using ComputerNetworksProject.Constants;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
+using System;
 
 namespace ComputerNetworksProject.Models
 {
@@ -21,22 +22,13 @@ namespace ComputerNetworksProject.Models
         public HomeModel(List<Product> products) { 
             Products= products;
             FilterdProducts= products;
-            ShowPages = new List<int>();
-            try
-            {
-                InitPage(1);
-            } catch(Exception ex) {
-                ProductsInPage = new List<Product>();
-                ShowPages.Add(1);
-                ActivePage = 1;
-            }
         }
 
         public HomeModel(List<Product> products,int page)
         {
             Products = products;
             FilterdProducts = products;
-            ShowPages = new List<int>();
+            ShowPages = [];
             InitPage(page);
         }
 
@@ -45,14 +37,18 @@ namespace ComputerNetworksProject.Models
 
             var totalCount = FilterdProducts.Count;
             var totalPages = (int)Math.Ceiling((decimal)totalCount/Constant.PageSize);
-            if(page<1 || page> totalPages)
+            if (totalPages == 0)
+            {
+                totalPages = 1;
+            }
+            if(page<1 || page > totalPages)
             {
                 throw new ArgumentException("not enough pages");
             }
             ProductsInPage = FilterdProducts.Skip((page - 1) * Constant.PageSize).Take(Constant.PageSize).ToList();
             if(ShowPages is null)
             {
-                ShowPages=new List<int>();  
+                ShowPages = [];
             }
             else
             {
@@ -70,12 +66,61 @@ namespace ComputerNetworksProject.Models
             ActivePage= page;
 
         }
+        public void ApplyFilters()
+        {
+            if (FilterInput is null)
+            {
+                return;
+            }
+            if (FilterInput.Search is not null)
+            {
+                FilterdProducts = FilterdProducts.Where(p =>
+                p.Name.Contains(FilterInput.Search, StringComparison.InvariantCultureIgnoreCase) 
+                || FilterInput.Search.Contains(p.Name, StringComparison.InvariantCultureIgnoreCase) 
+                || p.Category.Name.Contains(FilterInput.Search, StringComparison.InvariantCultureIgnoreCase)
+                || FilterInput.Search.Contains(p.Category.Name, StringComparison.InvariantCultureIgnoreCase)).ToList();
+            }
+            if(FilterInput.CategoryId is not null && FilterInput.CategoryId!=0)
+            {
+                FilterdProducts = FilterdProducts.Where(p =>
+                p.CategoryId== FilterInput.CategoryId).ToList();
+            }
+            if(FilterInput.Rate is not null && FilterInput.Rate > 0)
+            {
+                FilterdProducts = FilterdProducts.Where(p =>
+                p.Rate >= FilterInput.Rate).ToList();
+            }
+            if(FilterInput.OnlySale)
+            {
+                FilterdProducts = FilterdProducts.Where(p =>
+                p.PriceDiscount is not null).ToList();
+            }
+            if (FilterInput.StartPrice is not null)
+            {
+                FilterdProducts = FilterdProducts.Where(p => p.PriceDiscount is not null ? p.PriceDiscount >= FilterInput.StartPrice :
+                p.Price >= FilterInput.StartPrice).ToList();
+            }
+            if (FilterInput.EndPrice is not null)
+            {
+                FilterdProducts = FilterdProducts.Where(p => p.PriceDiscount is not null ? p.PriceDiscount <= FilterInput.EndPrice :
+                p.Price <= FilterInput.EndPrice).ToList();
+            }
+            if(FilterInput.StartDate is not null)
+            {
+                FilterdProducts = FilterdProducts.Where(p => p.Created >= FilterInput.StartDate).ToList();
+            }
+            if (FilterInput.EndDate is not null)
+            {
+                FilterdProducts = FilterdProducts.Where(p => p.Created <= FilterInput.EndDate).ToList();
+            }
+
+        }
 
         public class Filter
         {
 
             public string? Search { get; set; }
-            [Range(1,5)]
+            [Range(0,5)]
             public float? Rate { get; set; }
 
             public DateTime? StartDate { get; set; }
@@ -84,6 +129,7 @@ namespace ComputerNetworksProject.Models
             [Range(0, float.MaxValue,ErrorMessage ="Price greater than 0")]
             [RegularExpression(@"^\d+(\.\d+)?$", ErrorMessage = "Must be a valid number.")]
             public float? StartPrice { get; set; }
+
             [Range(0, float.MaxValue, ErrorMessage = "Price greater than 0")]
             [RegularExpression(@"^\d+(\.\d+)?$", ErrorMessage = "Must be a valid number.")]
             public float? EndPrice { get; set;}

@@ -1,16 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
 namespace ComputerNetworksProject.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<User>
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User>(options)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
-
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Product> Products { get; set; }
@@ -21,9 +15,10 @@ namespace ComputerNetworksProject.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Category>()
-                .HasIndex(c=> c.Name)
-                .IsUnique();
+            builder.Entity<Category>(c=>
+                c.HasIndex(c=> c.Name)
+                .IsUnique(true)
+            );
 
             builder.Entity<Product>()
                 .HasOne(p => p.Category)

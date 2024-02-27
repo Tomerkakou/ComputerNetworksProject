@@ -5,6 +5,7 @@
     ViewData["Products"] = "active";
 }
 
+<section class="container">
 <h1>Create Product</h1>
 <hr />
 <div class="row fw-medium">
@@ -57,7 +58,7 @@
         </form>
     </div>
 </div>
-
+</section>
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

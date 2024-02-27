@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -38,6 +37,7 @@ namespace ComputerNetworksProject.Data
         [ForeignKey("Category")]
         public int CategoryId { get; set; }
         public Category Category { get; set; }
+        public DateTime Created { get; set; }
 
         public byte[]? Img { get; set; }
         public string? ImgType { get; set; }
@@ -65,8 +65,13 @@ namespace ComputerNetworksProject.Data
         {
 
         }
-        public Product(string name,float price,Category category, string? description,float? priceDiscount):this()
+        public Product(string name,float price,Category category, string? description,float? priceDiscount,DateTime? created):this()
         {
+            if(created is null)
+            {
+                created = DateTime.Now;
+            }
+            Created = (DateTime)created;
             Name = name;
             Price = price;
             PriceDiscount = priceDiscount;

@@ -1,24 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ComputerNetworksProject.Data;
 using Microsoft.AspNetCore.Authorization;
-using System.Web;
-using ComputerNetworksProject.Data.Migrations;
+using System.IO;
+using Microsoft.Extensions.Options;
 
 namespace ComputerNetworksProject.Controllers
 {
     public class ProductsController : Controller
     {
+        private readonly ILogger<ProductsController> _logger;
         private readonly ApplicationDbContext _db;
-
-        public ProductsController(ApplicationDbContext context)
+        private readonly IConfiguration _config;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public ProductsController(IWebHostEnvironment webHostEnvironment, ILogger<ProductsController> logger, IConfiguration config, ApplicationDbContext context)
         {
             _db = context;
+            _logger = logger;
+            _config = config;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         //Show product
@@ -26,12 +27,14 @@ namespace ComputerNetworksProject.Controllers
         {
             if (id == null || _db.Products == null)
             {
+                _logger.LogWarning("product id is null");
                 return NotFound();
             }
 
             var product = await _db.Products.Include(p => p.Category).Include(p=>p.Rates).FirstOrDefaultAsync(p => p.Id == id);
             if (product == null)
             {
+                _logger.LogWarning("product id {0} is invalid", id);
                 return NotFound();
             }
 
@@ -60,36 +63,7 @@ namespace ComputerNetworksProject.Controllers
                 {
                     ModelState.AddModelError("PriceDiscount", "Must be lower than price");
                 }
-                if (image != null && image.Length > 0)
-                {
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        image.CopyTo(memoryStream);
-                        byte[] imageD = memoryStream.ToArray();
-                        string imageType = GetImageType(imageD);
-                        var product = new Product
-                        {
-                            Name = name,
-                            Description = description,
-                            Price = price,
-                            PriceDiscount = priceDiscount,
-                            CategoryId = categoryId,
-                            ImgType = imageType,
-                            Img = imageD,
-                            Stock= stock,
-                            AvailableStock= stock,
-                        };
-                        if (ModelState.IsValid)
-                        {
-                            _db.Add(product);
-                            await _db.SaveChangesAsync();
-                            TempData["success"] = $"Product {product.Name} created successfully!";
-                            return RedirectToAction(nameof(Create));
-                        }
-                        return View();
-                    }
-                }
-                else
+                if (ModelState.IsValid)
                 {
                     var product = new Product
                     {
@@ -101,15 +75,38 @@ namespace ComputerNetworksProject.Controllers
                         Stock = stock,
                         AvailableStock = stock,
                     };
-                    if (ModelState.IsValid)
+                    using (var memoryStream = new MemoryStream())
                     {
-                        _db.Add(product);
-                        await _db.SaveChangesAsync();
-                        TempData["success"] = $"Product {product.Name} created successfully!";
-                        return RedirectToAction(nameof(Create));
+                        var filePath=Path.Combine(_webHostEnvironment.WebRootPath, _config["defaultImageFile"]);
+
+                        if (image != null && image.Length > 0)
+                        {
+                            image.CopyTo(memoryStream);
+                        }
+                        else if(System.IO.File.Exists(filePath))
+                        {
+                            using (var fileStream = System.IO.File.OpenRead((filePath)))
+                            {
+                                fileStream.CopyTo(memoryStream);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogError("could not fine default image at path {0}", filePath);
+                            return StatusCode(500, $"Internal server error");
+                        }
+                        byte[] imageD = memoryStream.ToArray();
+                        string imageType = GetImageType(imageD);
+                        product.Img = imageD;
+                        product.ImgType= imageType;
                     }
-                    return View();
+                    _db.Add(product);
+                    await _db.SaveChangesAsync();
+                    TempData["success"] = $"Product {product.Name} created successfully!";
+                    return RedirectToAction(nameof(Create));
                 }
+                ViewData["CategoryId"] = new SelectList(_db.Categories, "Id", "Name");
+                return View(image);
             }
             catch (Exception ex)
             {
@@ -141,7 +138,7 @@ namespace ComputerNetworksProject.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id,float price, float? priceDiscount, string name, string description, int categoryId, IFormFile? image, int stock)
+        public async Task<IActionResult> Edit(int id,float price, float? priceDiscount, string name, string description, int categoryId, IFormFile? image, int stock,DateTime created)
         {
             var product = await _db.Products.FindAsync(id);
             if(product == null)
@@ -179,6 +176,7 @@ namespace ComputerNetworksProject.Controllers
                 product.AvailableStock= stock- orderedStock;
                 product.Stock = stock;
                 product.CategoryId = categoryId;
+                product.Created= created;
                 try
                 {
                     _db.Update(product);

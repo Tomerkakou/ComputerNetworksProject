@@ -3,11 +3,10 @@ using ComputerNetworksProject.Models;
 using ComputerNetworksProject.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
-using SendGrid.Helpers.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -33,6 +32,7 @@ builder.Services.Configure <EmailSettings>
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
 
 builder.Services.AddSession(options=>options.IdleTimeout=TimeSpan.FromMinutes(60));
+
 
 var app = builder.Build();
 

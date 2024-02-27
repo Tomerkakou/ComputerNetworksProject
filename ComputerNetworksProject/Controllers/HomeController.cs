@@ -1,7 +1,6 @@
 ﻿using ComputerNetworksProject.Data;
 using ComputerNetworksProject.Models;
 using ComputerNetworksProject.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -20,21 +19,27 @@ namespace ComputerNetworksProject.Controllers
         {
             _logger = logger;
             _db = db;
-            _homeModel = new HomeModel(_db.Products.Include(p => p.Rates).ToList());
+            _homeModel = new HomeModel([.. _db.Products.Include(p => p.Rates).Include(p=>p.Category)]);
         }
-
+        [HttpGet]
         public async Task<IActionResult> Index(int? page)
         {
             _homeModel.FilterInput = HttpContext.Session.GetObject<Filter>("Filter");
-            if (page is not null)
+            if(_homeModel.FilterInput is null)
             {
-                try
-                {
-                    _homeModel.InitPage((int)page);
+                _homeModel.FilterInput = new HomeModel.Filter { Rate = 0 };
+            }
+            page ??= 1;
+            {
+            }
+            try
+            {
+                _homeModel.ApplyFilters();
+                _homeModel.InitPage((int)page);
 
-                }catch(ArgumentException ex) {
-                    return NotFound();
-                }
+            }catch(ArgumentException ex) {
+                _logger.LogTrace(ex, "happend while genrating pages");
+                return NotFound();
             }
             var categories = await _db.Categories.ToListAsync();
             var all = new Category
@@ -54,7 +59,7 @@ namespace ComputerNetworksProject.Controllers
             if(ModelState.IsValid)
             {
                 HttpContext.Session.SetObject("Filter", homeModel.FilterInput);
-                return RedirectToAction("Index", "Home", new { httpMethod = "GET" });
+                return RedirectToAction(nameof(Index));
             }
             homeModel.Products=await _db.Products.ToListAsync();
             homeModel.FilterdProducts = homeModel.Products;
@@ -62,9 +67,10 @@ namespace ComputerNetworksProject.Controllers
             return View(homeModel);
         }
 
-        public IActionResult Privacy()
+        public IActionResult ResetFilter()
         {
-            return View();
+            HttpContext.Session.ClearObject("Filter");
+            return RedirectToAction(nameof(Index));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
