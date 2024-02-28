@@ -3,6 +3,8 @@ using ComputerNetworksProject.Constants;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 using System;
+using Microsoft.Data.SqlClient;
+using System.Globalization;
 
 namespace ComputerNetworksProject.Models
 {
@@ -15,6 +17,8 @@ namespace ComputerNetworksProject.Models
         public List<int>? ShowPages { get; set; }
         public int ActivePage { get; set; }
         public Filter? FilterInput { get; set; }
+
+        public bool? ShowTable { get; set; }
 
         public HomeModel() { 
 
@@ -34,9 +38,13 @@ namespace ComputerNetworksProject.Models
 
         public void InitPage(int page)
         {
-
+            int pageSize= Constant.PageSizeCards;
+            if (ShowTable is not null && (bool)ShowTable)
+            {
+                pageSize = Constant.PageSizeTable;
+            }
             var totalCount = FilterdProducts.Count;
-            var totalPages = (int)Math.Ceiling((decimal)totalCount/Constant.PageSize);
+            var totalPages = (int)Math.Ceiling((decimal)totalCount/ pageSize);
             if (totalPages == 0)
             {
                 totalPages = 1;
@@ -45,7 +53,7 @@ namespace ComputerNetworksProject.Models
             {
                 throw new ArgumentException("not enough pages");
             }
-            ProductsInPage = FilterdProducts.Skip((page - 1) * Constant.PageSize).Take(Constant.PageSize).ToList();
+            ProductsInPage = FilterdProducts.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             if(ShowPages is null)
             {
                 ShowPages = [];
@@ -114,6 +122,34 @@ namespace ComputerNetworksProject.Models
                 FilterdProducts = FilterdProducts.Where(p => p.Created <= FilterInput.EndDate).ToList();
             }
 
+        }
+        public void ApplySort(string sort)
+        {
+            var res = sort.Split('_');
+            string sortBy = res[0];
+            string sortOrder = res[1];
+
+            switch (sortBy)
+            {
+                case "price":
+                    FilterdProducts.Sort((p1, p2) => CompareByPrice(p1, p2, sortOrder));
+                    break;
+                case "rate":
+                    FilterdProducts.Sort((p1, p2) => sortOrder == "asc" ? p1.Rate.CompareTo(p2.Rate) : p2.Rate.CompareTo(p1.Rate));
+                    break;
+                case "cat":
+                    FilterdProducts.Sort((p1, p2) => sortOrder == "asc" ? p1.Category.Name.CompareTo(p2.Category.Name) : p2.Category.Name.CompareTo(p1.Category.Name));
+                    break;
+                default:
+                    throw new ArgumentException("Invalid sortBy argument");
+            }
+        }
+        static int CompareByPrice(Product p1, Product p2, string sortOrder)
+        {
+            float price1 = p1.PriceDiscount ?? p1.Price;
+            float price2 = p2.PriceDiscount ?? p2.Price;
+
+            return sortOrder == "asc" ? price1.CompareTo(price2) : price2.CompareTo(price1);
         }
 
         public class Filter

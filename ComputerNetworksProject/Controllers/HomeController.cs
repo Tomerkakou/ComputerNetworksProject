@@ -22,19 +22,31 @@ namespace ComputerNetworksProject.Controllers
             _homeModel = new HomeModel([.. _db.Products.Include(p => p.Rates).Include(p=>p.Category)]);
         }
         [HttpGet]
-        public async Task<IActionResult> Index(int? page)
+        public async Task<IActionResult> Index(int? page,string? sort,bool? table)
         {
+            
             _homeModel.FilterInput = HttpContext.Session.GetObject<Filter>("Filter");
             if(_homeModel.FilterInput is null)
             {
                 _homeModel.FilterInput = new HomeModel.Filter { Rate = 0 };
             }
+            if(table is not null)
+            {
+                HttpContext.Session.SetObject(nameof(table), table);
+            }
+            _homeModel.ShowTable = HttpContext.Session.GetObject<bool?>(nameof(table));
             page ??= 1;
             {
             }
             try
             {
                 _homeModel.ApplyFilters();
+                if (sort is not null)
+                {
+                    _homeModel.ApplySort((string)sort);
+                    ViewData["sort"] = sort;
+
+                }
                 _homeModel.InitPage((int)page);
 
             }catch(ArgumentException ex) {

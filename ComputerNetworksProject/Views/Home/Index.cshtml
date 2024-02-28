@@ -9,6 +9,7 @@
         <div class="accordion-item">
             <h2 class="accordion-header">
                 <button class="accordion-button collapsed fw-bold fs-6" type="button" data-bs-toggle="collapse" data-bs-target="#filter-body">
+                    <i class="bi bi-funnel-fill me-2"></i>
                     Filter
                 </button>
             </h2>
@@ -93,78 +94,159 @@
 </div>
 <div class="px-3">
     <div class="container-fluid">
+            <div class="row justify-content-between border-bottom pb-2 border-2 mb-1">
+                <div class="col-md-3 col-6 d-flex align-items-center">
+                    <a asp-controller="Home" asp-action="Index" asp-route-table="true"  class="btn btn-light me-2"><i class="bi bi-list-task"></i></a>
+                    <a asp-controller="Home" asp-action="Index" asp-route-table="false" class="btn btn-light"><i class="bi bi-grid"></i></a>
+                </div>
+                <div class="col-md-3 col-6 d-flex justify-content-end">
+                    <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-arrow-down-up me-1"></i>
+                        Sort
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a asp-controller="Home" asp-action="Index" asp-route-sort="price_asc" class="dropdown-item d-flex align-items-center" id="price_asc">
+                                <i class="bi bi-sort-numeric-down me-1"></i>
+                                Price
+                                <i class="bi bi-check2 ms-auto d-none"></i>
+                            </a>
+                        </li>
+                        <li><a asp-controller="Home" asp-action="Index" asp-route-sort="price_dec" class="dropdown-item d-flex align-items-center" id="price_dec"><i class="bi bi-sort-numeric-up-alt me-1"></i>Price<i class="bi bi-check2 ms-auto d-none"></i></a></li>
+                        <li><a asp-controller="Home" asp-action="Index" asp-route-sort="rate_asc" class="dropdown-item d-flex align-items-center" id="rate_asc"><i class="bi bi-sort-numeric-down me-1"></i>Rate<i class="bi bi-check2 ms-auto d-none"></i></a></li>
+                        <li><a asp-controller="Home" asp-action="Index" asp-route-sort="rate_dec" class="dropdown-item d-flex align-items-center" id="rate_dec"><i class="bi bi-sort-numeric-up-alt me-1"></i>Rate<i class="bi bi-check2 ms-auto d-none"></i></a></li>
+                        <li><a asp-controller="Home" asp-action="Index" asp-route-sort="cat_asc" class="dropdown-item d-flex align-items-center" id="cat_asc"><i class="bi bi-sort-alpha-down me-1"></i>Category<i class="bi bi-check2 ms-auto d-none"></i></a></li>
+                        <li><a asp-controller="Home" asp-action="Index" asp-route-sort="cat_dec" class="dropdown-item d-flex align-items-center" id="cat_dec"><i class="bi bi-sort-alpha-up-alt me-1"></i>Category<i class="bi bi-check2 ms-auto d-none"></i></a></li>
+                    </ul>
+                    @if (ViewData["sort"] is not null) {
+                    <script>
+                        const item = document.getElementById("@ViewData["sort"]")
+                        item.classList.add("active")
+                        item.querySelectorAll("i")[1].classList.remove("d-none")   
+                    </script>
+                    }
+                </div>  
+            </div>
+        </div>
         <div class="row">
-        @foreach (var product in Model.ProductsInPage)
-        {
-            if(product is null)
-                {
-            continue;
+            @if(Model.ShowTable is not null && (bool)Model.ShowTable)
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle  text-center">
+                        <thead class="table-primary">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Stock</th>
+                                <th scope="col">Rate</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        
+                            @for(int i=0;i<Model.ProductsInPage.Count;i++)
+                            {
+                                 var product = Model.ProductsInPage[i];
+                                <tr>
+                                    <th scope="row">@(i+1)</th>
+                                    <td>@product.Name</td>
+                                    <td>
+                                        @if (product?.PriceDiscount is not null)
+                                        {
+                                            @product.PriceDiscount;
+                                        }
+                                        else
+                                        {
+                                                @product?.Price;
+                                        }
+                                        $
+                                    </td>
+                                    <td>@product.Stock</td>
+                                    <td>@product.Rate</td>
+                                    <td><button class="btn btn-primary btn-sm">Add to cart</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
-            string imgSrc = "";
-            if (product is not null && product?.Img is not null && product?.ImgType is not null)
+            else
+            {
+                
+      
+                @foreach (var product in Model.ProductsInPage)
                 {
-                imgSrc = String.Format("data:image/{0};base64,{1}", product?.ImgType, Convert.ToBase64String(product?.Img));
-            }
-            <div class="col-xxl-2 col-lg-3 col-md-4 col-sm-6 col-12 p-2">
-                  <div class="card rounded-0 h-100 shadow" >
-                        <a asp-controller="Products" asp-action="Show" asp-route-id="@product.Id" class="tomer">
-                            <img src="@imgSrc" class="card-img-top bg-white" alt="...">
-                        </a> 
-                        <div class="card-body border-top d-flex flex-column">
-                            <div class="d-flex justify-content-between">
-                                <h5 class="card-title">@product?.Name</h5>
-                                @if(product?.PriceDiscount is not null)
+                if(product is null)
+                    {
+                continue;
+                }
+                string imgSrc = "";
+                if (product is not null && product?.Img is not null && product?.ImgType is not null)
+                    {
+                    imgSrc = String.Format("data:image/{0};base64,{1}", product?.ImgType, Convert.ToBase64String(product?.Img));
+                }
+                <div class="col-xxl-2 col-lg-3 col-md-4 col-sm-6 col-12 p-2">
+                      <div class="card rounded-0 h-100 shadow" >
+                            <a asp-controller="Products" asp-action="Show" asp-route-id="@product.Id" class="tomer">
+                                <img src="@imgSrc" class="card-img-top bg-white" alt="...">
+                            </a> 
+                            <div class="card-body border-top d-flex flex-column">
+                                <div class="d-flex justify-content-between">
+                                    <h5 class="card-title">@product?.Name</h5>
+                                    @if(product?.PriceDiscount is not null)
+                                    {
+                                        <span class="ms-auto">
+                                            <span class="fw-light fs-6 text-decoration-line-through">
+                                                @product?.Price
+                                            </span>
+                                            <span class="ms-2 fs-5 fw-normal text-danger">
+                                                @product?.PriceDiscount$
+                                            </span>
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="ms-2 fs-5 fw-normal" >
+                                            @product?.Price$
+                                        </span>
+                                    }
+                                </div>
+                                <div>
+                                    <span class="fs-5 fw-bold" id="product-@product.Id-rate">@product.Rate</span>
+                                    <span class="ms-2" style="font-size: 1.5rem; color: #ffcc00;"><i class="bi bi-star-fill"></i></span>
+                                </div>
+                                @if (product.AvailableStock <= 3)
                                 {
-                                    <span class="ms-auto">
-                                        <span class="fw-light fs-6 text-decoration-line-through">
-                                            @product?.Price
-                                        </span>
-                                        <span class="ms-2 fs-5 fw-normal text-danger">
-                                            @product?.PriceDiscount$
-                                        </span>
-                                    </span>
+                                    <div class="text-danger">
+                                        Only @product.AvailableStock left!
+                                    </div>
                                 }
                                 else
                                 {
-                                    <span class="ms-2 fs-5 fw-normal" >
-                                        @product?.Price$
-                                    </span>
+                                    <div>
+                                    @product.AvailableStock in stock
+                                    </div>
                                 }
-                            </div>
-                            <div>
-                                <span class="fs-5 fw-bold" id="product-@product.Id-rate">@product.Rate</span>
-                                <span class="ms-2" style="font-size: 1.5rem; color: #ffcc00;"><i class="bi bi-star-fill"></i></span>
-                            </div>
-                            @if (product.AvailableStock <= 3)
-                            {
-                                <div class="text-danger">
-                                    Only @product.AvailableStock left!
-                                </div>
-                            }
-                            else
-                            {
-                                <div>
-                                @product.AvailableStock in stock
-                                </div>
-                            }
 
-                            <div class="mt-auto ms-auto me-auto">
-                                <div class="star-rating mt-auto ms-auto me-auto" onmouseleave="resetStars()">
-                                    <span class="star" data-rating="1" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
-                                    <span class="star" data-rating="2" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
-                                    <span class="star" data-rating="3" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
-                                    <span class="star" data-rating="4" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
-                                    <span class="star" data-rating="5" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
-                                    <input  type="hidden" id="rating" value="0" />
+                                <div class="mt-auto ms-auto me-auto">
+                                    <div class="star-rating mt-auto ms-auto me-auto" onmouseleave="resetStars()">
+                                        <span class="star" data-rating="1" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
+                                        <span class="star" data-rating="2" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
+                                        <span class="star" data-rating="3" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
+                                        <span class="star" data-rating="4" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
+                                        <span class="star" data-rating="5" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
+                                        <input  type="hidden" id="rating" value="0" />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="card-footer text-body-secondary">
-                            <a href="#" class="btn btn-primary">Go somewhere</a>
-                        </div>
-                  </div>
-            </div>
-        }
+                            <div class="card-footer text-body-secondary">
+                                <a href="#" class="btn btn-primary">Go somewhere</a>
+                            </div>
+                      </div>
+                </div>
+                }
+            }
         </div>
         <div class="row px-2 border-top pt-3">
             <nav>
