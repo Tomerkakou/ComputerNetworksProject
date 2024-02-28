@@ -3,7 +3,8 @@
     ViewData["Title"] = "Home Page";
     ViewData["Home"] = "active";
 }
-<section class="px-5 mb-3">
+<section>
+<div class="px-5 mb-3">
     <div class="accordion accordion-flush" id="filter-accordion">
         <div class="accordion-item">
             <h2 class="accordion-header">
@@ -47,7 +48,7 @@
                                     <input asp-for="FilterInput.EndPrice" class="form-control" />
                                     <span asp-validation-for="FilterInput.EndPrice" class="text-danger"></span>
                                 </div> 
-                                <div class="col-md-3 col-sm-12">
+                                <div class="col-md-3 col-sm-6">
                                     @{/*
                                         <label class="form-label">Date Range:</label>
                                         <input name="FilterDate" type="text" class="form-control"/>
@@ -59,7 +60,7 @@
                                     <input asp-for="FilterInput.StartDate" class="form-control" />
                                     <span asp-validation-for="FilterInput.StartDate" class="text-danger"></span>
                                 </div>
-                                <div class="col-md-3 col-sm-12">                                 
+                                <div class="col-md-3 col-sm-6">                                 
                                     <label asp-for="FilterInput.EndDate" class="form-label">End Date:</label>
                                     <input asp-for="FilterInput.EndDate" class="form-control" />
                                     <span asp-validation-for="FilterInput.EndDate" class="text-danger"></span>
@@ -89,126 +90,117 @@
             </div>
         </div>
     </div>
-</section>
-
-
-    <section class="px-3">
+</div>
+<div class="px-3">
     <div class="container-fluid">
-            <div class="row">
-
-            @foreach (var product in Model.ProductsInPage)
+        <div class="row">
+        @foreach (var product in Model.ProductsInPage)
+        {
+            if(product is null)
                 {
-                if(product is null)
-                    {
-                continue;
-                }
-                string imgSrc = "";
-                if (product is not null && product?.Img is not null && product?.ImgType is not null)
-                    {
-                    imgSrc = String.Format("data:image/{0};base64,{1}", product?.ImgType, Convert.ToBase64String(product?.Img));
-                }
-
-                <div class="col-xxl-2 col-lg-3 col-md-4 col-sm-6 col-12 p-2">
-                        <div class="">
-                        <div class="card rounded-0 h-50 shadow" >
-                            
-                            <a asp-controller="Products" asp-action="Show" asp-route-id="@product.Id" class="tomer">
-
-                                <img src="@imgSrc" class="card-img-top" alt="...">
-
-                            </a>
-
-                            
-                            <div class="card-body border-top d-flex flex-column">
-                                <div class="d-flex justify-content-between">
-                                    <h5 class="card-title">@product?.Name</h5>
-                                    @if(product?.PriceDiscount is not null)
-                                        {
-                                            <span class="ms-auto">
-                                            <span class="fw-light fs-6 text-decoration-line-through">
+            continue;
+            }
+            string imgSrc = "";
+            if (product is not null && product?.Img is not null && product?.ImgType is not null)
+                {
+                imgSrc = String.Format("data:image/{0};base64,{1}", product?.ImgType, Convert.ToBase64String(product?.Img));
+            }
+            <div class="col-xxl-2 col-lg-3 col-md-4 col-sm-6 col-12 p-2">
+                  <div class="card rounded-0 h-100 shadow" >
+                        <a asp-controller="Products" asp-action="Show" asp-route-id="@product.Id" class="tomer">
+                            <img src="@imgSrc" class="card-img-top bg-white" alt="...">
+                        </a> 
+                        <div class="card-body border-top d-flex flex-column">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="card-title">@product?.Name</h5>
+                                @if(product?.PriceDiscount is not null)
+                                {
+                                    <span class="ms-auto">
+                                        <span class="fw-light fs-6 text-decoration-line-through">
                                             @product?.Price
-                                            </span>
-                                            <span class="ms-2 fs-5 fw-normal text-danger">
+                                        </span>
+                                        <span class="ms-2 fs-5 fw-normal text-danger">
                                             @product?.PriceDiscount$
                                         </span>
                                     </span>
-                                    }
-                                    else
-                                        {
-                                        <span class="ms-2 fs-5 fw-normal" >
+                                }
+                                else
+                                {
+                                    <span class="ms-2 fs-5 fw-normal" >
                                         @product?.Price$
                                     </span>
                                 }
+                            </div>
+                            <div>
+                                <span class="fs-5 fw-bold" id="product-@product.Id-rate">@product.Rate</span>
+                                <span class="ms-2" style="font-size: 1.5rem; color: #ffcc00;"><i class="bi bi-star-fill"></i></span>
+                            </div>
+                            @if (product.AvailableStock <= 3)
+                            {
+                                <div class="text-danger">
+                                    Only @product.AvailableStock left!
                                 </div>
-                                    <div>
-                                    <span class="fs-5 fw-bold" id="product-@product.Id-rate">@product.Rate</span>
-                                    <span class="ms-2" style="font-size: 2rem; color: #ffcc00;">&#9733;</span>
+                            }
+                            else
+                            {
+                                <div>
+                                @product.AvailableStock in stock
                                 </div>
-                                @if (product.AvailableStock <= 3)
-                                    {
-                                    <div class="text-danger">
-                                        Only @product.AvailableStock left!
-                                </div>
-                                }
-                                else
-                                    {
-                                        <div>
-                                        @product.AvailableStock in stock
-                                </div>
-                                }
+                            }
 
-                                <div class="mt-auto ms-auto me-auto">
-                                    <div class="star-rating mt-auto ms-auto me-auto" onmouseleave="resetStars()">
-                                        <span class="star" data-rating="1" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)">&#9733;</span>
-                                        <span class="star" data-rating="2" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)">&#9733;</span>
-                                        <span class="star" data-rating="3" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)">&#9733;</span>
-                                        <span class="star" data-rating="4" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)">&#9733;</span>
-                                        <span class="star" data-rating="5" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)">&#9733;</span>
-                                        <input  type="hidden" id="rating" value="0" />
+                            <div class="mt-auto ms-auto me-auto">
+                                <div class="star-rating mt-auto ms-auto me-auto" onmouseleave="resetStars()">
+                                    <span class="star" data-rating="1" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
+                                    <span class="star" data-rating="2" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
+                                    <span class="star" data-rating="3" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
+                                    <span class="star" data-rating="4" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
+                                    <span class="star" data-rating="5" onmouseover="highlightStars(this)" onclick="selectStar(this,@product.Id)"><i class="bi bi-star-fill"></i></span>
+                                    <input  type="hidden" id="rating" value="0" />
                                 </div>
                             </div>
-                            </div>
-                            <div class="card-footer text-body-secondary">
-                                <a href="#" class="btn btn-primary">Go somewhere</a>
                         </div>
-                    </div>
-                </div>
-        </div>
+                        <div class="card-footer text-body-secondary">
+                            <a href="#" class="btn btn-primary">Go somewhere</a>
+                        </div>
+                  </div>
+            </div>
         }
         </div>
-        <hr />
-            <div class="row">
-            <nav aria-label="Page navigation example">
-                    @{
-                    var prev = Model.ActivePage-1;
-                    var pDisabled = prev < 1 ? "disabled" :"";
+        <div class="row px-2 border-top pt-3">
+            <nav>
+                @{
+                    var prev = Model.ActivePage - 1;
+                    var pDisabled = prev < 1 ? "disabled" : "";
                     var succ = Model.ActivePage + 1;
-                    var sDisabled = !Model.ShowPages.Contains(succ) ? "disabled" :"";
+                    var sDisabled = !Model.ShowPages.Contains(succ) ? "disabled" : "";
                 }
                 <ul class="pagination justify-content-center fs-6 fw-semibold">
                     <li class="page-item @pDisabled">
 
                         <a asp-controller="Home" asp-action="Index" asp-route-page="@prev" class="page-link">
-                        <span>&laquo;</span>
-                    </a>
+                            <span>&laquo;</span>
+                        </a>
                     </li>
                     @foreach (var pageNum in Model.ShowPages)
-                        {
+                    {
                         var active = pageNum == Model.ActivePage ? "active" : "";
                         <li class="page-item @active">
                             <a asp-controller="Home" asp-action="Index" asp-route-page="@pageNum" class="page-link">@pageNum</a>
-                    </li>
+                        </li>
                     }
                     <li class="page-item @sDisabled">
                         <a asp-controller="Home" asp-action="Index" asp-route-page="@succ" class="page-link">
-                        <span>&raquo;</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+                            <span>&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </div>
-            </div>
-    </section>
+</div>
+</section>
+
+    
 
 
 @section Scripts {

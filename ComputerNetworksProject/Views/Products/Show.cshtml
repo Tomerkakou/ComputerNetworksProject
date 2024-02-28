@@ -17,7 +17,7 @@
         @if (User.IsInRole("Admin"))
         {
 
-            <a asp-controller="Products" asp-action="Edit" asp-route-id="@Model.Id" class="pt-3 fs-3 text-dark text-opacity-50"><i class="bi bi-pencil-square"></i></a>
+            <a asp-controller="Products" asp-action="Edit" asp-route-id="@Model.Id" class="pt-3 fs-3 text-dark-emphasis text-opacity-50"><i class="bi bi-pencil-square"></i></a>
         }
     </div>
     <hr />
@@ -51,7 +51,7 @@
                         <div>
                             <span class="fw-bold me-2">Rate:</span>
                             <span class="fs-5 fw-bold">@Model.Rate</span>
-                            <span class="ms-2" style="font-size: 2rem; color: #ffcc00;">&#9733;</span>
+                            <span class="ms-2" style="font-size: 1.5rem; color: #ffcc00;"><i class="bi bi-star-fill"></i></span>
                         </div>
                         <div>
                             <span class="fw-bold me-2">Price:</span>

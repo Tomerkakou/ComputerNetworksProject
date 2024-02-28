@@ -70,7 +70,7 @@ async function selectStar(star, productId) {
     try {
         const res = await fetch(`/products/AddRating?productId=${productId}&rate=${rating}`);
         const newRate = await res.json();
-        const grandpa = star.parentNode.parentNode;
+        const grandpa = star.parentNode;
         while (grandpa.firstChild) {
             grandpa.removeChild(grandpa.firstChild);
         }
