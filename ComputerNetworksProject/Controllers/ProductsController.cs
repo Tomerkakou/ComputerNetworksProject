@@ -45,36 +45,36 @@ namespace ComputerNetworksProject.Controllers
         [Authorize(Roles ="Admin")]
         public IActionResult Create()
         {
-            ViewData["CategoryId"] = new SelectList(_db.Categories, "Id", "Name");
+            ViewData["CategoryName"] = new SelectList(_db.Categories, "Name", "Name");
             return View();
         }
 
-        // POST: Products/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(float price,float? priceDiscount,string name,string description,int categoryId ,IFormFile? image,int stock)//[Bind("Id,Price,PriceDiscount,Name,Description,Stars,CategoryId,Img,ImgType")] Product product)
+        public async Task<IActionResult> Create(float price,float? priceDiscount,string name,string? description,string categoryName ,IFormFile? image,int stock)//[Bind("Id,Price,PriceDiscount,Name,Description,Stars,CategoryId,Img,ImgType")] Product product)
         {
             try
             {
+                var product = new Product
+                {
+                    Name = name,
+                    Description = description,
+                    Price = price,
+                    PriceDiscount = priceDiscount,
+                    CategoryName = categoryName,
+                    Stock = stock,
+                    AvailableStock = stock,
+                    Created=DateTime.Now,
+                };
                 if (priceDiscount >= price)
                 {
                     ModelState.AddModelError("PriceDiscount", "Must be lower than price");
                 }
                 if (ModelState.IsValid)
                 {
-                    var product = new Product
-                    {
-                        Name = name,
-                        Description = description,
-                        Price = price,
-                        PriceDiscount = priceDiscount,
-                        CategoryId = categoryId,
-                        Stock = stock,
-                        AvailableStock = stock,
-                    };
+                    
                     using (var memoryStream = new MemoryStream())
                     {
                         var filePath=Path.Combine(_webHostEnvironment.WebRootPath, _config["defaultImageFile"]);
@@ -105,8 +105,8 @@ namespace ComputerNetworksProject.Controllers
                     TempData["success"] = $"Product {product.Name} created successfully!";
                     return RedirectToAction(nameof(Create));
                 }
-                ViewData["CategoryId"] = new SelectList(_db.Categories, "Id", "Name");
-                return View(image);
+                ViewData["CategoryName"] = new SelectList(_db.Categories, "Name", "Name");
+                return View(product);
             }
             catch (Exception ex)
             {
@@ -128,7 +128,7 @@ namespace ComputerNetworksProject.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_db.Categories, "Id", "Name", product.CategoryId);
+            ViewData["CategoryName"] = new SelectList(_db.Categories, "Name", "Name", product.CategoryName);
             return View(product);
         }
 
@@ -138,7 +138,7 @@ namespace ComputerNetworksProject.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id,float price, float? priceDiscount, string name, string description, int categoryId, IFormFile? image, int stock,DateTime created)
+        public async Task<IActionResult> Edit(int id,float price, float? priceDiscount, string name, string description, string categoryName, IFormFile? image, int stock,DateTime created)
         {
             var product = await _db.Products.FindAsync(id);
             if(product == null)
@@ -175,7 +175,7 @@ namespace ComputerNetworksProject.Controllers
                 product.PriceDiscount = priceDiscount;
                 product.AvailableStock= stock- orderedStock;
                 product.Stock = stock;
-                product.CategoryId = categoryId;
+                product.CategoryName = categoryName;
                 product.Created= created;
                 try
                 {
@@ -200,35 +200,12 @@ namespace ComputerNetworksProject.Controllers
                 TempData["success"] = $"{name} updated successfully!";
                 return RedirectToAction(nameof(Show), new { id = id });
             }
-            ViewData["CategoryId"] = new SelectList(_db.Categories, "Id", "Name", product.CategoryId);
+            ViewData["CategoryName"] = new SelectList(_db.Categories, "Name", "Name", product.CategoryName);
             return View(product);
         }
 
-        // GET: Products/Delete/5
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _db.Products == null)
-            {
-                return NotFound();
-            }
-
-            var product = await _db.Products
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return View(product);
-        }
-
-        // POST: Products/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             if (_db.Products == null)
             {
@@ -237,12 +214,13 @@ namespace ComputerNetworksProject.Controllers
             var product = await _db.Products.FindAsync(id);
             if (product != null)
             {
-                _db.Products.Remove(product);
+                product.ProductStatus=Product.Status.DELETED;
             }
             
             await _db.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index","Home");
         }
+
         //adding rating to product    
         public async Task<IActionResult> AddRating([FromQuery(Name = "productId")] int productId, [FromQuery(Name = "rate")]  int rate)
         {

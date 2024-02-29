@@ -1,13 +1,14 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ComputerNetworksProject.Data
 {
+    [PrimaryKey(nameof(CartId),nameof(ProductId))]
     public class CartItem
     {
-        [Key]
-        public int Id { get; set; }
+
 
         [DefaultValue(0)]
         [Range(0, int.MaxValue, ErrorMessage = "Please enter valid integer Number")]

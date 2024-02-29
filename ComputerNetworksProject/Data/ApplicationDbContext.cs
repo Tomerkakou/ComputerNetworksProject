@@ -15,15 +15,10 @@ namespace ComputerNetworksProject.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Category>(c=>
-                c.HasIndex(c=> c.Name)
-                .IsUnique(true)
-            );
-
             builder.Entity<Product>()
                 .HasOne(p => p.Category)
                 .WithMany()
-                .HasForeignKey(p => p.CategoryId)
+                .HasForeignKey(p => p.CategoryName)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }

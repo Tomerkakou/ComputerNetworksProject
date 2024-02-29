@@ -13,5 +13,7 @@ namespace ComputerNetworksProject.Data
         public string? ImgType { get; set; }
 
         public ICollection<Payment>? Payments { get; set; }
+
+        public ICollection<Cart>? Carts { get; set; }
     }
 }

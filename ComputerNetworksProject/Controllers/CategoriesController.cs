@@ -51,9 +51,9 @@ namespace ComputerNetworksProject.Controllers
                     TempData["info"] = $"{data.Input.Name} added successfully!";
                     return View(model);
                 }
-                catch
+                catch(DbUpdateException ex) 
                 {
-                    TempData["Error"] = "Error have occured please try deleting again!";
+                    TempData["Error"] = $"Category {data.Input.Name} already exists!";
                 }
             }
             var categories2 = await _db.Categories.ToListAsync();
@@ -62,22 +62,27 @@ namespace ComputerNetworksProject.Controllers
 
         }
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(string? name)
         {
-            if(id is not null)
+            if(name is not null)
             {
-                var category=await _db.Categories.FindAsync(id);
+                if(name == "Default")
+                {
+                    return Unauthorized();
+                }
+                var category=await _db.Categories.FindAsync(name);
                 if(category is null)
                 {
-                    TempData["Error"] = $"Category id {id} is not valid";
+                    TempData["Error"] = $"Category {name} is not valid";
                     return RedirectToAction(nameof(Index));
                 }
                 try
                 {
                     _db.Remove(category);
-                    var products=await _db.Products.Where(p=>p.CategoryId== id).ToListAsync();
-                    products.ForEach((p) => { p.CategoryId = 1; });
+                    var products=await _db.Products.Where(p=>p.CategoryName == name).ToListAsync();
+                    products.ForEach((p) => { p.CategoryName = "Default"; });
                     await _db.SaveChangesAsync();
+                    TempData["info"] = $"Category {name} Deleted successfully!";
                 }
                 catch (Exception ex)
                 {
@@ -89,7 +94,7 @@ namespace ComputerNetworksProject.Controllers
             {
                 TempData["Error"] = "Error have occured please try deleting again!";
             }
-            TempData["info"] = "Deleted successfully!";
+            
             return RedirectToAction(nameof(Index));
         }
     }

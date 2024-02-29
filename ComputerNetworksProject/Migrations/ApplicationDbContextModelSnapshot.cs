@@ -4,19 +4,16 @@ using ComputerNetworksProject.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace ComputerNetworksProject.Data.Migrations
+namespace ComputerNetworksProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240227181851_created")]
-    partial class created
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,24 +45,16 @@ namespace ComputerNetworksProject.Data.Migrations
 
             modelBuilder.Entity("ComputerNetworksProject.Data.CartItem", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
-
                     b.Property<int>("CartId")
                         .HasColumnType("int");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
 
-                    b.HasIndex("CartId");
+                    b.HasKey("CartId", "ProductId");
 
                     b.HasIndex("ProductId");
 
@@ -74,31 +63,18 @@ namespace ComputerNetworksProject.Data.Migrations
 
             modelBuilder.Entity("ComputerNetworksProject.Data.Category", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasKey("Name");
 
                     b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("ComputerNetworksProject.Data.Payment", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("CartId")
                         .HasColumnType("int");
@@ -117,18 +93,13 @@ namespace ComputerNetworksProject.Data.Migrations
                     b.Property<int>("MonthExp")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<int>("YearExp")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserId", "CartId");
 
                     b.HasIndex("CartId")
                         .IsUnique();
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Payments");
                 });
@@ -144,8 +115,9 @@ namespace ComputerNetworksProject.Data.Migrations
                     b.Property<int?>("AvailableStock")
                         .HasColumnType("int");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
@@ -171,12 +143,15 @@ namespace ComputerNetworksProject.Data.Migrations
                     b.Property<float?>("PriceDiscount")
                         .HasColumnType("real");
 
+                    b.Property<int>("ProductStatus")
+                        .HasColumnType("int");
+
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("CategoryName");
 
                     b.ToTable("Products");
                 });
@@ -415,7 +390,7 @@ namespace ComputerNetworksProject.Data.Migrations
             modelBuilder.Entity("ComputerNetworksProject.Data.Cart", b =>
                 {
                     b.HasOne("ComputerNetworksProject.Data.User", "User")
-                        .WithMany()
+                        .WithMany("Carts")
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
@@ -450,7 +425,9 @@ namespace ComputerNetworksProject.Data.Migrations
 
                     b.HasOne("ComputerNetworksProject.Data.User", "User")
                         .WithMany("Payments")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Cart");
 
@@ -461,7 +438,7 @@ namespace ComputerNetworksProject.Data.Migrations
                 {
                     b.HasOne("ComputerNetworksProject.Data.Category", "Category")
                         .WithMany()
-                        .HasForeignKey("CategoryId")
+                        .HasForeignKey("CategoryName")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -542,6 +519,8 @@ namespace ComputerNetworksProject.Data.Migrations
 
             modelBuilder.Entity("ComputerNetworksProject.Data.User", b =>
                 {
+                    b.Navigation("Carts");
+
                     b.Navigation("Payments");
                 });
 #pragma warning restore 612, 618

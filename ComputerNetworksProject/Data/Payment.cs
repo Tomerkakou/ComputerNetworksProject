@@ -1,13 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ComputerNetworksProject.Data
 {
+    [PrimaryKey(nameof(UserId),nameof(CartId))]
     public class Payment
     {
-        [Key]
-        public int Id { get; set; }
-
         [Required]
         [NotMapped]
         [StringLength(16)]
@@ -27,10 +26,13 @@ namespace ComputerNetworksProject.Data
         public int YearExp { get; set; }
 
         public int CartId { get; set; }
+
         [ForeignKey("CartId")]
         public virtual Cart Cart { get; set; }
 
+
         public string? UserId { get; set; }
+
         [ForeignKey("UserId")]
         public User? User { get; set; }
 

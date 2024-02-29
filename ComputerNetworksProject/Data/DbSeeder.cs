@@ -17,8 +17,8 @@ namespace ComputerNetworksProject.Data
 
             var user = new User
             {
-                UserName = "tomerkakou@gmail.com",
-                Email = "tomerkakou@gmail.com",
+                UserName = "admin@gmail.com",
+                Email = "admin@gmail.com",
                 FirstName = "Tomer",
                 LastName = "Kakou",
                 EmailConfirmed = true,
@@ -34,10 +34,9 @@ namespace ComputerNetworksProject.Data
             var _db = service.GetService<ApplicationDbContext>();
             var category = new Category
             {
-                Id = 1,
                 Name = "Default",
             };
-            if(await _db.Categories.FindAsync(1) is null)
+            if(await _db.Categories.FindAsync("Default") is null)
             {
                 _db.Categories.Add(category);
                 await _db.SaveChangesAsync();

@@ -88,10 +88,10 @@ namespace ComputerNetworksProject.Models
                 || p.Category.Name.Contains(FilterInput.Search, StringComparison.InvariantCultureIgnoreCase)
                 || FilterInput.Search.Contains(p.Category.Name, StringComparison.InvariantCultureIgnoreCase)).ToList();
             }
-            if(FilterInput.CategoryId is not null && FilterInput.CategoryId!=0)
+            if(FilterInput.CategoryName is not null && FilterInput.CategoryName != "ALL")
             {
                 FilterdProducts = FilterdProducts.Where(p =>
-                p.CategoryId== FilterInput.CategoryId).ToList();
+                p.CategoryName == FilterInput.CategoryName).ToList();
             }
             if(FilterInput.Rate is not null && FilterInput.Rate > 0)
             {
@@ -173,7 +173,7 @@ namespace ComputerNetworksProject.Models
             [DefaultValue(false)]
             public bool OnlySale { get; set; }
 
-            public int? CategoryId { get; set; }
+            public string? CategoryName { get; set; }
 
         }
     }

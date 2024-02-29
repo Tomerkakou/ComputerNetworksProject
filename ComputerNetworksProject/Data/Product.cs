@@ -6,6 +6,14 @@ namespace ComputerNetworksProject.Data
 {
     public class Product
     {
+        public enum Status
+        {
+            ACTIVE,
+            DELETED,
+        }
+
+        [DefaultValue(Status.ACTIVE)]
+        public Status ProductStatus { get; set; }
         public float? _rate;
         [Key]
         public int Id { get; set; }
@@ -25,17 +33,17 @@ namespace ComputerNetworksProject.Data
         public float? PriceDiscount { get; set; }
 
         [Required]
-        [StringLength(20,MinimumLength =1)]
+        [StringLength(15,MinimumLength =1, ErrorMessage = "Length between 1 to 15")]
         public string Name { get; set; }
 
-        [StringLength(60)]
+        [StringLength(60,ErrorMessage ="Maximum 60 letters!")]
         public string? Description { get; set; }
 
         public ICollection<Rate> Rates { get; set; }
 
         [Required]
         [ForeignKey("Category")]
-        public int CategoryId { get; set; }
+        public string CategoryName { get; set; }
         public Category Category { get; set; }
         public DateTime Created { get; set; }
 
@@ -77,7 +85,7 @@ namespace ComputerNetworksProject.Data
             PriceDiscount = priceDiscount;
             Description = description;
             Category = category;
-            CategoryId = category.Id;
+            CategoryName = category.Name;
         }
     }
 }

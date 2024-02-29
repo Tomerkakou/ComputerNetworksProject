@@ -19,7 +19,7 @@ namespace ComputerNetworksProject.Controllers
         {
             _logger = logger;
             _db = db;
-            _homeModel = new HomeModel([.. _db.Products.Include(p => p.Rates).Include(p=>p.Category)]);
+            _homeModel = new HomeModel([.. _db.Products.Where(p=>p.ProductStatus!=Product.Status.DELETED).Include(p => p.Rates).Include(p=>p.Category)]);
         }
         [HttpGet]
         public async Task<IActionResult> Index(int? page,string? sort,bool? table)
@@ -56,11 +56,10 @@ namespace ComputerNetworksProject.Controllers
             var categories = await _db.Categories.ToListAsync();
             var all = new Category
             {
-                Id = 0,
                 Name="ALL"      
             };
             categories.Insert(0, all);
-            ViewData["CategoryId"] = new SelectList(categories, "Id", "Name");
+            ViewData["CategoryName"] = new SelectList(categories, "Name", "Name");
 
             return View(_homeModel);
         }
@@ -76,6 +75,13 @@ namespace ComputerNetworksProject.Controllers
             homeModel.Products=await _db.Products.ToListAsync();
             homeModel.FilterdProducts = homeModel.Products;
             homeModel.InitPage(homeModel.ActivePage);
+            var categories = await _db.Categories.ToListAsync();
+            var all = new Category
+            {
+                Name = "ALL"
+            };
+            categories.Insert(0, all);
+            ViewData["CategoryName"] = new SelectList(categories, "Name", "Name");
             return View(homeModel);
         }
 

@@ -16,8 +16,10 @@
         <h1>@Model.Name</h1>
         @if (User.IsInRole("Admin"))
         {
-
-            <a asp-controller="Products" asp-action="Edit" asp-route-id="@Model.Id" class="pt-3 fs-3 text-dark-emphasis text-opacity-50"><i class="bi bi-pencil-square"></i></a>
+            <div class="d-flex align-content-center">
+                <a asp-controller="Products" asp-action="Edit" asp-route-id="@Model.Id" class="pt-3 fs-3 text-dark-emphasis text-opacity-50 me-2"><i class="bi bi-pencil-square"></i></a>
+                <a asp-controller="Products" asp-action="Delete" asp-route-id="@Model.Id" class="pt-3 fs-3 text-danger-emphasis me-2"><i class="bi bi-trash3"></i></a>
+            </div>
         }
     </div>
     <hr />
@@ -25,14 +27,7 @@
         <div class="col-md-10">
                 <div class="row">
                     <div class="col-md-8 col-12 d-flex justify-content-center align-content-center h-100">
-                        @if (String.IsNullOrEmpty(imgSrc))
-                        {
-                        <img src="~/images/noImage.jpg" class="card-img-top img-thumbnail" alt="...">
-                        }
-                        else
-                        {
-                        <img src="@imgSrc" class="card-img-top img-thumbnail" alt="...">
-                        }
+                    <img src="@imgSrc" class="card-img-top img-thumbnail bg-white" alt="...">
                     </div>
                 
                     <div class="col-md-4 col-12 fs-5">

@@ -12,11 +12,14 @@
         <div class="row">
             <div class="col-md-8 col-12 d-flex justify-content-center align-content-center h-100 p-3 fw-bold">
                 <ul class="list-group w-100">
-                    @foreach(var category in Model.Categories)
+                    <li class="list-group-item d-flex">
+                            @Model.Categories.FirstOrDefault().Name
+                    </li>
+                    @foreach (var category in Model.Categories.Skip(1))
                     {
                         <li class="list-group-item d-flex">
                             @category.Name
-                            <span onclick="deleteCat(@category.Id)"  data-bs-toggle="modal" data-bs-target="#confirmModal" class="text-danger ms-auto"><i class="bi bi-x-lg"></i></span>
+                            <span onclick="deleteCat('@category.Name')"  data-bs-toggle="modal" data-bs-target="#confirmModal" class="text-danger ms-auto"><i class="bi bi-x-lg"></i></span>
                         </li>
                     }
                 </ul>
@@ -63,7 +66,8 @@
 
 <script>
     function deleteCat(categoryId) {
+        console.log(categoryId)
         var link = document.getElementById("modellink");
-        link.href = `/Categories/Delete/${categoryId}`;
+        link.href = `/Categories/Delete?name=${categoryId}`;
     }
 </script>
