@@ -37,6 +37,30 @@ $('input[name="FilterDate"]').on('cancel.daterangepicker', function (ev, picker)
 });
 */
 //stars select section
+
+$(document).ready(function () {
+    // Function to load and display all cookies
+    function loadCookies() {
+        var allCookies = document.cookie.split('; ');
+
+        for (var i = 0; i < allCookies.length; i++) {
+            var cookieParts = allCookies[i].split('=');
+            var cookieName = cookieParts[0];
+            if (cookieName.startsWith('products-rating-')) {
+                const rating = document.getElementById(cookieName)
+                rating.remove();
+            }
+            
+        }
+    }
+
+    loadCookies();
+});
+
+function updateValue(value) {
+    document.getElementById('filter-rate').innerText = value;
+}
+
 function highlightStars(star) {
     var rating = star.getAttribute("data-rating");
     
@@ -51,7 +75,11 @@ function highlightStars(star) {
 }
 
 function resetStars() {
-    const rate = document.getElementById("rating").value
+    const rating = document.getElementById("rating")
+    if (rating == null) {
+        return;
+    }
+    const rate = rating.value
     if (rate == 0) {
         var activeStars = document.querySelectorAll(".star.active");
         activeStars.forEach(function (s) {
@@ -82,5 +110,26 @@ async function selectStar(star, productId) {
     } catch (err) {
         console.log(err);
     }
+
+}
+
+async function addToCart(btn) {
+    
+    var productId = btn.getAttribute("data-product");
+    btn.disabled = true;
+    var childs=btn.querySelectorAll("span")
+    const text = childs[0];
+    text.classList.add("d-none");
+    const spiner = childs[1];
+    spiner.classList.remove("d-none");
+    const loading = childs[2];
+    loading.classList.remove("d-none");
+
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    text.classList.remove("d-none");
+    spiner.classList.add("d-none");
+    loading.classList.add("d-none")
+    btn.disabled = false;
 
 }

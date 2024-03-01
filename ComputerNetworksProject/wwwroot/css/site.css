@@ -51,8 +51,3 @@ display: inline-block;
 
 
 
-
-.card-overlay-content {
-    z-index: 1; /* Ensure the overlay content appears on top of the image */
-}
-

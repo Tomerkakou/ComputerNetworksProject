@@ -135,27 +135,16 @@ namespace ComputerNetworksProject.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    string html = $@"
-                        <div style=""background-color: #eaeaea; padding: 2%;"">
-                            <div style=""text-align:center; margin: auto; font-size: 14px; color: #353434; max-width: 500px; border-radius: 0.375rem; background: white; padding: 50px"">
-                                <h2 style=""margin-top: 36px; font-size: 24px; font-weight: bold;"">Confirm your account</h2>
-                                <p style=""margin-top: 8px;"">
-                                    Please confirm your account by clicking the button below!
-                                </p>
+                    string html = $@"<h2 style=""margin-top: 36px; font-size: 24px; font-weight: bold;"">Confirm your account</h2>
+                                    <p style=""margin-top: 8px;"">
+                                        Please confirm your account by clicking the button below!
+                                    </p>
     
-                                <p style=""margin: 30px 0px; text-align: center"">
-                                    <a href=""{HtmlEncoder.Default.Encode(callbackUrl)}"" style=""background-color: #3781f0; white-space: nowrap; color: white; border-color: transparent; border-width: 1px; border-radius: 0.375rem; font-size: 18px; padding-left: 16px; padding-right: 16px; padding-top: 10px; padding-bottom: 10px; text-decoration: none; margin-top: 4px; margin-bottom: 4px;"">
-                                        Confirm
-                                    </a>
-                                </p>
-                            </div>
-                        </div>
-                        <div style=""text-align: left; line-height: 18px; color: #666666; margin: 24px"">
-                            <hr size=""1"" style=""height: 1px; border: none; color: #D8D8D8; background-color: #D8D8D8"">
-                            <div style=""text-align: center"">
-                            </div>
-                        </div>
-                    ";
+                                    <p style=""margin: 30px 0px; text-align: center"">
+                                        <a href=""{HtmlEncoder.Default.Encode(callbackUrl)}"" style=""background-color: #3781f0; white-space: nowrap; color: white; border-color: transparent; border-width: 1px; border-radius: 0.375rem; font-size: 18px; padding-left: 16px; padding-right: 16px; padding-top: 10px; padding-bottom: 10px; text-decoration: none; margin-top: 4px; margin-bottom: 4px;"">
+                                            Confirm
+                                        </a>
+                                    </p>";
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",html);
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)

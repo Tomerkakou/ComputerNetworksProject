@@ -240,6 +240,11 @@ namespace ComputerNetworksProject.Controllers
             });
             product._rate = null;
             _db.SaveChanges();
+            var cookieOptions = new CookieOptions
+            {
+                Expires = DateTime.Now.AddDays(1),
+            };
+            Response.Cookies.Append($"products-rating-{productId}", "true", cookieOptions);
             return Ok(product.Rate);
         }
 

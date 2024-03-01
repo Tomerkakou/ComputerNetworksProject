@@ -9,12 +9,12 @@ namespace ComputerNetworksProject.Services
 {
     public class EmailSender : IEmailSender
     {
-        private readonly IConfiguration _configuration;
         private readonly IOptions<EmailSettings> _options;
-        public EmailSender(IConfiguration configuration, IOptions<EmailSettings> options)
+        private readonly ILogger<EmailSender> _logger;
+        public EmailSender(IOptions<EmailSettings> options,  ILogger<EmailSender> logger)
         {
-            _configuration = configuration;
             _options = options;
+            _logger = logger;
         }
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
@@ -26,8 +26,24 @@ namespace ComputerNetworksProject.Services
             var to = new EmailAddress(email);
             var plainTextContent = Regex.Replace(htmlMessage, "<[^>]*>", "");
             var msg = MailHelper.CreateSingleEmail(from, to, subject,
-            plainTextContent, htmlMessage);
+            plainTextContent, htmlBase(htmlMessage));
             var response = await sendGridClient.SendEmailAsync(msg);
+        }
+        private string htmlBase(string htmlMessage)
+        {
+            string html = $@"
+                        <div style=""background-color: #eaeaea; padding: 2%;"">
+                            <div style=""text-align:center; margin: auto; font-size: 14px; color: #353434; max-width: 500px; border-radius: 0.375rem; background: white; padding: 50px"">
+                                {htmlMessage}
+                            </div>
+                        </div>
+                        <div style=""text-align: left; line-height: 18px; color: #666666; margin: 24px"">
+                            <hr size=""1"" style=""height: 1px; border: none; color: #D8D8D8; background-color: #D8D8D8"">
+                            <div style=""text-align: center"">
+                            </div>
+                        </div>
+                        ";
+            return html;
         }
     }
 }
