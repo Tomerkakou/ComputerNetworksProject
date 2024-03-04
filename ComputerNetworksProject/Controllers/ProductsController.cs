@@ -5,9 +5,11 @@ using ComputerNetworksProject.Data;
 using Microsoft.AspNetCore.Authorization;
 using System.IO;
 using Microsoft.Extensions.Options;
+using ComputerNetworksProject.Services;
 
 namespace ComputerNetworksProject.Controllers
 {
+    [ServiceFilter(typeof(CartFilter))]
     public class ProductsController : Controller
     {
         private readonly ILogger<ProductsController> _logger;

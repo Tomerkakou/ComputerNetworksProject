@@ -3,6 +3,7 @@ using ComputerNetworksProject.Models;
 using ComputerNetworksProject.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,8 +24,9 @@ builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.Requi
     .AddDefaultTokenProviders()
     .AddPasswordValidator<UsernameAsPasswordValidator>();
 
+builder.Services.AddScoped<CartFilter>();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options => options.Filters.Add(typeof(CartFilter)));
 
 builder.Services.Configure <EmailSettings>
    (options => builder.Configuration.GetSection("EmailSettings").Bind(options));

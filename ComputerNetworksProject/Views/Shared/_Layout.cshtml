@@ -61,7 +61,7 @@
 
     </header>
     <main role="main">
-        <partial name="_CartPartial" />
+        <partial name="_CartPartial" model="@ViewData["Cart"]"/>
         @RenderBody()
     </main>
     @{/*<footer class="border-top footer text-muted">

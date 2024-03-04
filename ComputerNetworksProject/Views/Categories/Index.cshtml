@@ -57,8 +57,8 @@
                 All products related to that category will update to Default category
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancell</button>
-                <a type="button" id="modellink" href="" class="btn btn-primary">Understood</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a type="button" id="modallink" href="" class="btn btn-primary">Understood</a>
             </div>
         </div>
     </div>
@@ -67,7 +67,7 @@
 <script>
     function deleteCat(categoryId) {
         console.log(categoryId)
-        var link = document.getElementById("modellink");
+        var link = document.getElementById("modallink");
         link.href = `/Categories/Delete?name=${categoryId}`;
     }
 </script>

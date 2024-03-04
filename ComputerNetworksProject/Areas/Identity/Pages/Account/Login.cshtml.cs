@@ -4,10 +4,12 @@
 
 using System.ComponentModel.DataAnnotations;
 using ComputerNetworksProject.Data;
+using ComputerNetworksProject.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace ComputerNetworksProject.Areas.Identity.Pages.Account
 {
@@ -15,11 +17,13 @@ namespace ComputerNetworksProject.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly ApplicationDbContext _db;
 
-        public LoginModel(SignInManager<User> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<User> signInManager, ILogger<LoginModel> logger, ApplicationDbContext db)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _db = db;
         }
 
         /// <summary>
@@ -80,6 +84,8 @@ namespace ComputerNetworksProject.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
+            ViewData["Cart"] = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstAsync();
+
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 ModelState.AddModelError(string.Empty, ErrorMessage);
@@ -97,6 +103,7 @@ namespace ComputerNetworksProject.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+            ViewData["Cart"] = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstAsync();
             returnUrl ??= Url.Content("~/");
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();

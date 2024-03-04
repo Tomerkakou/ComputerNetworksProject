@@ -1,11 +1,13 @@
 ﻿using ComputerNetworksProject.Data;
 using ComputerNetworksProject.Models;
+using ComputerNetworksProject.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ComputerNetworksProject.Controllers
 {
+    [ServiceFilter(typeof(CartFilter))]
     public class CategoriesController(ApplicationDbContext context) : Controller
     {
         private readonly ApplicationDbContext _db = context;

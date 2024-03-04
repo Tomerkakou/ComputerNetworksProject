@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace ComputerNetworksProject.Models
 {
-    public class HomeModel:LayoutModel
+    public class HomeModel
     {
         
         public List<Product>? Products { get; set; }
