@@ -39,5 +39,46 @@ namespace ComputerNetworksProject.Data
             }
         }
 
+        public float GetTotalPrice()
+        {
+            float price = 0;
+            foreach (CartItem item in CartItems)
+            {
+                price += item.GetPrice();
+            }
+            return price;
+        }
+
+        public int GetItemsCount()
+        {
+            return CartItems.Count;
+        }
+
+        public async void AddProduct(Product product)
+        {
+            if(product.AvailableStock<1)
+            {
+                throw new ArgumentException($"No enough stock for product {product.Name}");
+            }
+            var cartItem=CartItems.Where(ci=>ci.ProductId==product.Id).FirstOrDefault();
+            if (cartItem is null)
+            {
+                cartItem = new CartItem
+                {
+                    Amount = 1,
+                    Product = product,
+                    ProductId = product.Id,
+                    CartId = Id,
+                    Cart = this,
+                };
+                CartItems.Add(cartItem);
+            }
+            else
+            {
+                cartItem.Amount++;
+            }
+            product.AvailableStock--;
+        }
+
     }
 }

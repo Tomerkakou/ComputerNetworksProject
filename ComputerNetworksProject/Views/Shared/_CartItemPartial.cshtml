@@ -15,11 +15,11 @@
         </div>
         <div class="vstack gap-1 col-7 d-flex justify-content-center align-items-center py-1">
             <div class="fw-semibold">@Model.Product.Name</div>
-            <div class="">Price: 300$</div>
+            <div class="">Price: @Model.GetPrice()$</div>
             <div class="d-flex justify-content-center align-items-center">
-                <button class="btn btn-link text-dark-emphasis"><i class="bi bi-caret-left-fill"></i></button>
+                <button class="btn btn-link text-dark-emphasis" disabled="@(Model.Amount==1)"><i class="bi bi-caret-left-fill"></i></button>
                 <input class="form-control form-control-sm w-25 mx-1 text-center" value="@Model.Amount" readonly />
-                <button class="btn btn-link text-dark-emphasis" disabled><i class="bi bi-caret-right-fill"></i></a>
+                <button class="btn btn-link text-dark-emphasis" disabled="@(Model.Product.AvailableStock==0)" onclick="addToCartArrow(@Model.ProductId)"><i class="bi bi-caret-right-fill"></i></button>
             </div>
         </div>
         <div class="col-1 p-2">
@@ -27,3 +27,4 @@
         </div>
     </div>
 </div>
+

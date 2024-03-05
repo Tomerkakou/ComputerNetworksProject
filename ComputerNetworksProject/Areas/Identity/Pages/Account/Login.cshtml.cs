@@ -84,7 +84,7 @@ namespace ComputerNetworksProject.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
-            ViewData["Cart"] = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstAsync();
+           
 
             if (!string.IsNullOrEmpty(ErrorMessage))
             {

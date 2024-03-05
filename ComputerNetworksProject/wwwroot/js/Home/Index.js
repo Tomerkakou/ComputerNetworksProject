@@ -125,7 +125,8 @@ async function addToCart(btn) {
     const loading = childs[2];
     loading.classList.remove("d-none");
 
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    const res = await fetch(`cart/AddItem?productId=${productId}`)
+    
 
     text.classList.remove("d-none");
     spiner.classList.add("d-none");

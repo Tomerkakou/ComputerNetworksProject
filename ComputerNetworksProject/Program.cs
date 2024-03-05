@@ -26,6 +26,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.Requi
 
 builder.Services.AddScoped<CartFilter>();
 
+builder.Services.AddRazorPages().AddMvcOptions(options => options.Filters.Add(typeof(CartFilter)));
 builder.Services.AddControllersWithViews(options => options.Filters.Add(typeof(CartFilter)));
 
 builder.Services.Configure <EmailSettings>

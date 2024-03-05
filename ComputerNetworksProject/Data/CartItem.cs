@@ -34,5 +34,10 @@ namespace ComputerNetworksProject.Data
             CartId = cart.Id;
             Cart = cart;
         }
+
+        public float GetPrice()
+        {
+            return Product.Price*Amount;
+        }
     }
 }

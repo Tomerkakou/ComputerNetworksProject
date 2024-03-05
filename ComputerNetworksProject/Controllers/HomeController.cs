@@ -9,7 +9,7 @@ using static ComputerNetworksProject.Models.HomeModel;
 
 namespace ComputerNetworksProject.Controllers
 {
-    [ServiceFilter(typeof(CartFilter))]
+   // [ServiceFilter(typeof(CartFilter))]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -25,7 +25,6 @@ namespace ComputerNetworksProject.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(int? page,string? sort,bool? table)
         {
-
             _homeModel.FilterInput = HttpContext.Session.GetObject<Filter>("Filter");
             if(_homeModel.FilterInput is null)
             {
