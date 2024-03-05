@@ -1,16 +1,6 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿
 
-// Write your JavaScript code.
-
-
-
-/*!
- * Color mode toggler for Bootstrap's docs (https://getbootstrap.com/)
- * Copyright 2011-2024 The Bootstrap Authors
- * Licensed under the Creative Commons Attribution 3.0 Unported License.
- */
-
+//color mode
 (() => {
     'use strict'
 
@@ -87,47 +77,65 @@
 })()
 
 
-function showPassword(element) {
-    // Your showPassword implementation
-}
+const productsHub = new signalR.HubConnectionBuilder().withUrl("/hubs/productshub").build();
 
-function checkPasswordStrength(inputElement) {
-    var password = inputElement.value;
-    var strength = calculatePasswordStrength(password);
-    updateProgressBar(strength);
-}
+productsHub.on("productNewAvailableStock", async (productId, stock, cartItemAmount) => {
+    const productCard = $(`#productCard-${productId}`)
+    const productTr = $(`#productTr-${productId}`)
+    if (productCard.length > 0) {
+        $.ajax({
+            url: `/Home/GetProductCardParital?productId=${productId}`,
+            type: 'GET',
+            success: function (data) {
+                const parent = productCard.parent()
+                const index = parent.children().index(productCard)
+                productCard.remove()
+                if (index === parent.children().length) {
+                    parent.append(data)
+                }
+                else {
+                    parent.children().eq(index).before(data);
+                }
+            },
+            error: function () {
+                console.log('Error fetching data');
+            }
+        });
+    }
+    else if (productTr.length > 0) {
+        $.ajax({
+            url: `/Home/GetProductCardParital?productId=${productId}&type=tr`,
+            type: 'GET',
+            success: function (data) {
+                productTr.children(':not(:first-child)').remove();
+                productTr.append(data);
+            },
+            error: function () {
+                console.log('Error fetching data');
+            }
+        });
+    }
+    
+    const cartItemQtyParent = $(`#cartItem-qty-${productId}`)
+    if (cartItemQtyParent.length > 0 && cartItemQtyParent.children().length == 3) {
+        const leftarrow = cartItemQtyParent.children().eq(0);
+        const input = cartItemQtyParent.children().eq(1);
+        const rightarrow = cartItemQtyParent.children().eq(2);
 
-function calculatePasswordStrength(password) {
-
-    var hasCapitalLetter = /[A-Z]/.test(password);
-    var hasSpecialCharacter = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    var hasNumber = /\d/.test(password);
-    var hasMinLength = password.length >= 6;
-
-
-    var strength = (hasCapitalLetter + hasSpecialCharacter + hasNumber + hasMinLength) / 4 * 100;
-
-    strength = Math.min(100, Math.max(0, strength));
-
-    return strength;
-}
-
-function updateProgressBar(strength) {
-    var progressBar = document.getElementById('password-strength-bar');
-    progressBar.style.width = strength + '%';
-
-    // Optionally, change the color based on strength
-    if (strength < 50) {
-        progressBar.classList.remove('bg-warning', 'bg-success');
-        progressBar.classList.add('bg-danger');
-    } else if (strength < 80) {
-        progressBar.classList.remove('bg-danger', 'bg-success');
-        progressBar.classList.add('bg-warning');
-    } else {
-        progressBar.classList.remove('bg-danger', 'bg-warning');
-        progressBar.classList.add('bg-success');
+        leftarrow.prop("disabled", cartItemAmount == 1)
+        input.val(cartItemAmount)
+        rightarrow.prop("disabled",stock==0)
+       
     }
 
-    // Show the progress bar
-    progressBar.parentElement.classList.remove('d-none');
+});
+
+function fullfilled() {
+
 }
+
+function rejected() {
+
+}
+
+productsHub.start().then(fullfilled,rejected)

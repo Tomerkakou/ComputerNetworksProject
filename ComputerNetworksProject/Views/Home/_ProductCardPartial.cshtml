@@ -1,23 +1,27 @@
 ﻿@model ComputerNetworksProject.Data.Product
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
 @{
-string imgSrc = "";
+    string imgSrc = "";
     if (Model is not null && Model?.Img is not null && Model?.ImgType is not null)
     {
         imgSrc = String.Format("data:image/{0};base64,{1}", Model?.ImgType, Convert.ToBase64String(Model?.Img));
     }
+    string opacity = (Model.AvailableStock == 0 ? "opacity-50" : "");
+
 }
-<div class="col-xxl-2 col-lg-3 col-md-4 col-sm-6 col-12 p-2">
-    <div class="card rounded-0 h-100 shadow @(Model.AvailableStock==0? "opacity-50" :"")">
-        @if (Model.PriceDiscount is not null)
+<div id="productCard-@Model.Id" class="col-xxl-2 col-lg-3 col-md-4 col-sm-6 col-12 p-2">
+    <div class="card rounded-0 h-100 shadow">
+        @if (Model.PriceDiscount is not null && Model.AvailableStock != 0)
         {
             <span class="ms-2 position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger-subtle text-danger-emphasis">
                 Discount!
             </span>
         }
         <a asp-controller="Products" asp-action="Show" asp-route-id="@Model.Id" class="tomer">
-            <img src="@imgSrc" class="card-img-top bg-white" alt="...">
+            <img src="@imgSrc" class="card-img-top bg-white @opacity" alt="...">
         </a>
-        <div class="card-body border-top d-flex flex-column">
+        <div class="card-body border-top d-flex flex-column @opacity">
             <div class="d-flex justify-content-between">
                 <h5 class="card-title">@Model?.Name</h5>
                 @if (Model?.PriceDiscount is not null)
@@ -38,10 +42,12 @@ string imgSrc = "";
                     </span>
                 }
             </div>
+ 
             <div>
-                <span class="fs-5 fw-bold" id="product-@Model.Id-rate">@Model.Rate</span>
+                <span class="fs-5 fw-bold">@Model.Rate</span>
                 <span class="ms-2" style="font-size: 1.5rem; color: #ffcc00;"><i class="bi bi-star-fill"></i></span>
             </div>
+
             @if (Model.AvailableStock <= 3)
             {
                 <div class="text-danger">
@@ -56,22 +62,32 @@ string imgSrc = "";
             }
 
             <div class="mt-auto ms-auto me-auto">
-                <div id="products-rating-@Model.Id" class="star-rating mt-auto ms-auto me-auto" onmouseleave="resetStars()">
-                    <span class="star" data-rating="1" onmouseover="highlightStars(this)" onclick="selectStar(this,@Model.Id)"><i class="bi bi-star-fill"></i></span>
-                    <span class="star" data-rating="2" onmouseover="highlightStars(this)" onclick="selectStar(this,@Model.Id)"><i class="bi bi-star-fill"></i></span>
-                    <span class="star" data-rating="3" onmouseover="highlightStars(this)" onclick="selectStar(this,@Model.Id)"><i class="bi bi-star-fill"></i></span>
-                    <span class="star" data-rating="4" onmouseover="highlightStars(this)" onclick="selectStar(this,@Model.Id)"><i class="bi bi-star-fill"></i></span>
-                    <span class="star" data-rating="5" onmouseover="highlightStars(this)" onclick="selectStar(this,@Model.Id)"><i class="bi bi-star-fill"></i></span>
-                    <input type="hidden" id="rating" value="0" />
-                </div>
+                @if (HttpContextAccessor.HttpContext.Request.Cookies[$"products-rating-{@Model.Id}"] is null)
+                {
+                    <div id="products-rating-@Model.Id" class="star-rating mt-auto ms-auto me-auto" onmouseleave="resetStars()">
+                        <span class="star" data-rating="1" onmouseover="highlightStars(this)" onclick="selectStar(this,@Model.Id)"><i class="bi bi-star-fill"></i></span>
+                        <span class="star" data-rating="2" onmouseover="highlightStars(this)" onclick="selectStar(this,@Model.Id)"><i class="bi bi-star-fill"></i></span>
+                        <span class="star" data-rating="3" onmouseover="highlightStars(this)" onclick="selectStar(this,@Model.Id)"><i class="bi bi-star-fill"></i></span>
+                        <span class="star" data-rating="4" onmouseover="highlightStars(this)" onclick="selectStar(this,@Model.Id)"><i class="bi bi-star-fill"></i></span>
+                        <span class="star" data-rating="5" onmouseover="highlightStars(this)" onclick="selectStar(this,@Model.Id)"><i class="bi bi-star-fill"></i></span>
+                        <input type="hidden" id="rating" value="0" />
+                    </div>
+                }
             </div>
         </div>
         <div class="card-footer text-body-secondary">
-            <button class="btn btn-primary" onclick="addToCart(this)" data-product="@Model.Id" type="button">
-                <span>Add to cart</span>
-                <span class="spinner-border spinner-border-sm d-none"></span>
-                <span role="status" class="d-none">Loading...</span>
-            </button>
+            @if(Model.AvailableStock>0){
+                <button class="btn btn-primary" onclick="addToCart(this)" data-product="@Model.Id" type="button">
+                    <span>Add to cart</span>
+                    <span class="spinner-border spinner-border-sm d-none"></span>
+                    <span role="status" class="d-none">Loading...</span>
+                </button>
+                <button class="btn btn-primary">Buy now</button>
+            }
+            else
+            {
+                <button class="btn btn-primary">Notify</button>
+            }
         </div>
     </div>
 </div>

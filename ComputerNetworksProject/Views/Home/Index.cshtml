@@ -145,7 +145,7 @@
                             @for(int i=0;i<Model.ProductsInPage.Count;i++)
                             {
                                  var product = Model.ProductsInPage[i];
-                                <tr>
+                                <tr id="productTr-@product.Id">
                                     <th scope="row">@(i+1)</th>
                                     <partial name="_ProductTableRowPartial" model="@product" />
                                 </tr>

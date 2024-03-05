@@ -37,7 +37,7 @@ $('input[name="FilterDate"]').on('cancel.daterangepicker', function (ev, picker)
 });
 */
 //stars select section
-
+/*
 $(document).ready(function () {
     // Function to load and display all cookies
     function loadCookies() {
@@ -48,7 +48,9 @@ $(document).ready(function () {
             var cookieName = cookieParts[0];
             if (cookieName.startsWith('products-rating-')) {
                 const rating = document.getElementById(cookieName)
-                rating.remove();
+                if (rating != null) {
+                    rating.remove();
+                }
             }
             
         }
@@ -56,7 +58,7 @@ $(document).ready(function () {
 
     loadCookies();
 });
-
+*/
 function updateValue(value) {
     document.getElementById('filter-rate').innerText = value;
 }

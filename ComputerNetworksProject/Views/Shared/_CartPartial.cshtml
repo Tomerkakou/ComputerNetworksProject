@@ -19,7 +19,10 @@
     {
         <div class="offcanvas-body pt-0">
             <div class="row">
-                <partial name="_CartItemPartial" model="Model.CartItems.First()"/>
+                @foreach (var cartItem in Model.CartItems)
+                {
+                    <partial name="_CartItemPartial" model="cartItem" />
+                }
             </div>
         </div>
         <div class="container-fluid border-top border-2 p-2">

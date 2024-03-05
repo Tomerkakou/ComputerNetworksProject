@@ -70,22 +70,7 @@
 </section>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        function showPassword(clickedButton) {
-            const inputContainer = clickedButton.closest('.input-group');
-            const passwordInput = inputContainer.querySelector('input');
-            const iconElement = clickedButton.querySelector('i');
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            if (type === 'password') {
-                iconElement.classList.remove('bi-eye-slash-fill');
-                iconElement.classList.add('bi-eye');
-            } else {
-                iconElement.classList.remove('bi-eye-fill');
-                iconElement.classList.add('bi-eye-slash-fill');
-            }
-        }
-    </script>
+    <script src="~/js/Identity/Identity.js" asp-append-version="true"></script>
 }
 
 @{/*

@@ -1,6 +1,8 @@
 ﻿using ComputerNetworksProject.Data;
+using ComputerNetworksProject.Hubs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace ComputerNetworksProject.Controllers
@@ -10,8 +12,10 @@ namespace ComputerNetworksProject.Controllers
         private readonly ApplicationDbContext _db;
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
-        public CartController(ApplicationDbContext db, SignInManager<User> signInManager, UserManager<User> userManager)
+        private readonly IHubContext<ProductsHub> _hub;
+        public CartController(ApplicationDbContext db, SignInManager<User> signInManager, UserManager<User> userManager, IHubContext<ProductsHub> hub)
         {
+            _hub = hub;
             _db = db;
             _signInManager = signInManager;
             _userManager = userManager;
@@ -45,17 +49,43 @@ namespace ComputerNetworksProject.Controllers
             }
             try
             {
-                cart.AddProduct(product);
+                var cartItemAmount=cart.AddProduct(product);
                 await _db.SaveChangesAsync();
-            }catch (ArgumentException ex)
+                await _hub.Clients.All.SendAsync("productNewAvailableStock", productId, product.AvailableStock, cartItemAmount);
+                return Ok();
+            }
+            catch (ArgumentException ex)
             {
                 return Unauthorized(ex.Message);
             }catch(DbUpdateException ex)
             {
                 return BadRequest(ex.Message);
             }
+        }
 
-            return Ok();
+        public async Task<IActionResult> DecreaseItem(int? productId)
+        {
+            Cart? cart = (Cart?)ViewData["Cart"];
+            if (productId is null)
+            {
+                return BadRequest("No productId");
+            }
+            var product=await _db.Products.FindAsync(productId);
+            if(cart is null)
+            {
+                return BadRequest("No cart");
+            }
+            try
+            {
+                var cartItemAmount = cart.DecreaseItemAmount((int)productId);
+                await _db.SaveChangesAsync();
+                await _hub.Clients.All.SendAsync("productNewAvailableStock", productId, product.AvailableStock,cartItemAmount);
+                return Ok();
+            }
+            catch(ArgumentNullException ex)
+            {
+                return BadRequest("NO such product in cart");
+            }
         }
     }
 }

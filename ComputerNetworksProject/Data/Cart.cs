@@ -54,7 +54,7 @@ namespace ComputerNetworksProject.Data
             return CartItems.Count;
         }
 
-        public async void AddProduct(Product product)
+        public int AddProduct(Product product)
         {
             if(product.AvailableStock<1)
             {
@@ -78,7 +78,18 @@ namespace ComputerNetworksProject.Data
                 cartItem.Amount++;
             }
             product.AvailableStock--;
+            return cartItem.Amount;
         }
+
+        public int DecreaseItemAmount(int productId)
+        {
+            var cartItem=CartItems.Single(ci=>ci.ProductId == productId);
+            cartItem.Amount--;
+            cartItem.Product.AvailableStock++;
+            return cartItem.Amount;
+        }
+
+
 
     }
 }

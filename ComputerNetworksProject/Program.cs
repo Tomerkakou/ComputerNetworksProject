@@ -1,4 +1,5 @@
 using ComputerNetworksProject.Data;
+using ComputerNetworksProject.Hubs;
 using ComputerNetworksProject.Models;
 using ComputerNetworksProject.Services;
 using Microsoft.AspNetCore.Identity;
@@ -33,9 +34,9 @@ builder.Services.Configure <EmailSettings>
    (options => builder.Configuration.GetSection("EmailSettings").Bind(options));
 
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
-
+builder.Services.AddSignalR();
 builder.Services.AddSession(options=>options.IdleTimeout=TimeSpan.FromMinutes(60));
-
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 var app = builder.Build();
 
@@ -63,6 +64,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHub<ProductsHub>("/hubs/productshub");
 app.MapRazorPages();
 
 using (var scope = app.Services.CreateScope())

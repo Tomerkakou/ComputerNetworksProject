@@ -1,8 +1,10 @@
 ﻿using ComputerNetworksProject.Data;
+using ComputerNetworksProject.Hubs;
 using ComputerNetworksProject.Models;
 using ComputerNetworksProject.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using static ComputerNetworksProject.Models.HomeModel;
@@ -14,10 +16,12 @@ namespace ComputerNetworksProject.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _db;
+        private readonly IHubContext<ProductsHub> _hub;
         private HomeModel _homeModel;
 
-        public HomeController(ILogger<HomeController> logger,ApplicationDbContext db)
+        public HomeController(ILogger<HomeController> logger,ApplicationDbContext db, IHubContext<ProductsHub> hub)
         {
+            _hub= hub;  
             _logger = logger;
             _db = db;
             _homeModel = new HomeModel([.. _db.Products.Where(p=>p.ProductStatus!=Product.Status.DELETED).Include(p => p.Rates).Include(p=>p.Category)]);
@@ -95,6 +99,24 @@ namespace ComputerNetworksProject.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public async Task<IActionResult> GetProductCardParital(int? productId,string? type = "card")
+        {
+            if(productId is null)
+            {
+                return BadRequest("null productId");
+            }
+            var product=await _db.Products.FindAsync(productId);
+            if(product is null)
+            {
+                return BadRequest("not valid product id");
+            }
+            if (type == "tr")
+            {
+                return PartialView("_ProductTableRowPartial",product);
+            }
+            return PartialView("_ProductCardPartial", product);
         }
     }
 }

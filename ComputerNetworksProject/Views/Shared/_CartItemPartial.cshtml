@@ -11,15 +11,15 @@
 <div class="col-12 border-top">
     <div class="row">
         <div class="col-4 d-flex justify-content-center align-items-center p-2">
-            <img src="~/images/logo.jpg" style="object-fit:contain; width:100%; height:100%;" />
+            <img src="@imgSrc" style="object-fit:contain; width:100%; height:100%;" />
         </div>
         <div class="vstack gap-1 col-7 d-flex justify-content-center align-items-center py-1">
             <div class="fw-semibold">@Model.Product.Name</div>
             <div class="">Price: @Model.GetPrice()$</div>
-            <div class="d-flex justify-content-center align-items-center">
-                <button class="btn btn-link text-dark-emphasis" disabled="@(Model.Amount==1)"><i class="bi bi-caret-left-fill"></i></button>
+            <div class="d-flex justify-content-center align-items-center" id="cartItem-qty-@Model.ProductId">
+                <button class="btn btn-link text-dark-emphasis" disabled="@(Model.Amount==1)" onclick="decreaseArrow(@Model.ProductId)"><i class="bi bi-caret-left-fill"></i></button>
                 <input class="form-control form-control-sm w-25 mx-1 text-center" value="@Model.Amount" readonly />
-                <button class="btn btn-link text-dark-emphasis" disabled="@(Model.Product.AvailableStock==0)" onclick="addToCartArrow(@Model.ProductId)"><i class="bi bi-caret-right-fill"></i></button>
+                <button class="btn btn-link text-dark-emphasis" disabled="@(Model.Product.AvailableStock==0)" onclick="increaseArrow(@Model.ProductId)"><i class="bi bi-caret-right-fill"></i></button>
             </div>
         </div>
         <div class="col-1 p-2">
