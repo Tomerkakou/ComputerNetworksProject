@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Authorization;
 using System.IO;
 using Microsoft.Extensions.Options;
 using ComputerNetworksProject.Services;
+using ComputerNetworksProject.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.CodeAnalysis;
 
 namespace ComputerNetworksProject.Controllers
 {
@@ -16,12 +19,14 @@ namespace ComputerNetworksProject.Controllers
         private readonly ApplicationDbContext _db;
         private readonly IConfiguration _config;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public ProductsController(IWebHostEnvironment webHostEnvironment, ILogger<ProductsController> logger, IConfiguration config, ApplicationDbContext context)
+        private readonly IHubContext<ProductsHub> _hub;
+        public ProductsController(IWebHostEnvironment webHostEnvironment, ILogger<ProductsController> logger, IConfiguration config, ApplicationDbContext context, IHubContext<ProductsHub> hub)
         {
             _db = context;
             _logger = logger;
             _config = config;
             _webHostEnvironment = webHostEnvironment;
+            _hub = hub; 
         }
 
         //Show product
@@ -199,6 +204,7 @@ namespace ComputerNetworksProject.Controllers
                 {
                     //send email notifications
                 }
+                await _hub.Clients.All.SendAsync("productNewAvailableStock", product.Id, product.AvailableStock);
                 TempData["success"] = $"{name} updated successfully!";
                 return RedirectToAction(nameof(Show), new { id = id });
             }

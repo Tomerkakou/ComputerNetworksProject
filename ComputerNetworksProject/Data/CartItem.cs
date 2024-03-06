@@ -37,7 +37,11 @@ namespace ComputerNetworksProject.Data
 
         public float GetPrice()
         {
-            return Product.Price*Amount;
+            if(Product.PriceDiscount is null)
+            {
+                return Product.Price * Amount;
+            }
+            return (float)(Product.PriceDiscount*Amount);
         }
     }
 }

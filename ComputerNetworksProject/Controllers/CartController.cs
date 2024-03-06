@@ -1,8 +1,10 @@
 ﻿using ComputerNetworksProject.Data;
 using ComputerNetworksProject.Hubs;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 
 namespace ComputerNetworksProject.Controllers
@@ -75,7 +77,7 @@ namespace ComputerNetworksProject.Controllers
                 {
                     await _hub.Clients.All.SendAsync("cartChanged", cartItem.ProductId,cartItem.Amount, cartItem.GetPrice(), cart.Id, cart.GetTotalPrice(), cart.GetItemsCount());
                 }
-                return Ok(new {cartId=cart.Id});
+                return Ok(new {cartId=cart.Id,cartCount=cart.GetItemsCount()});
             }
             catch (ArgumentException ex)
             {
@@ -121,6 +123,70 @@ namespace ComputerNetworksProject.Controllers
             }
         }
 
+        public async Task<IActionResult> DeleteItem(int? productId)
+        {
+            Cart? cart = (Cart?)ViewData["Cart"];
+            if (productId is null)
+            {
+                return BadRequest("No productId");
+            }
+            if(cart is null)
+            {
+                return BadRequest("cart is null");
+            }
+            var cartItem = cart.DeleteItem((int)productId);
+            var product=cartItem.Product;
+            _db.CartItems.Remove(cartItem);
+            if (cart.GetItemsCount() == 0)
+            {
+                //delete cart
+                _db.Carts.Remove(cart);
+                await _db.SaveChangesAsync();
+                await _hub.Clients.All.SendAsync("clearCart", cart.Id);
+                HttpContext.Response.Cookies.Delete("cart_id");
+            }
+            else
+            {
+                // only remove one item
+                await _db.SaveChangesAsync();
+                await _hub.Clients.All.SendAsync("cartItemRemove", productId, cart.Id, cart.GetTotalPrice(), cart.GetItemsCount());
+                if (!User.Identity.IsAuthenticated)
+                {
+                    //reset cart expire
+                    var cookieOptions = new CookieOptions
+                    {
+                        Expires = DateTime.Now.AddDays(1),
+                    };
+                    HttpContext.Response.Cookies.Append("cart_id", cart.Id.ToString(), cookieOptions);
+                }
+            }     
+            await _hub.Clients.All.SendAsync("productNewAvailableStock", productId, product.AvailableStock);
+            
+
+            return Ok();    
+
+        }
+
+        public async Task<IActionResult> DeleteCart()
+        {
+            Cart? cart = (Cart?)ViewData["Cart"];
+            if (cart is null)
+            {
+                return BadRequest("cart is null");
+            }
+            var products = cart.ClearCart();
+            //delete cart
+            _db.Carts.Remove(cart);
+            await _db.SaveChangesAsync();
+            await _hub.Clients.All.SendAsync("clearCart", cart.Id);
+            HttpContext.Response.Cookies.Delete("cart_id");
+            foreach (var product in products)
+            {
+                await _hub.Clients.All.SendAsync("productNewAvailableStock", product.Id, product.AvailableStock);
+            }
+            return Ok();
+        }
+
         public async Task<IActionResult> GetCartItem(int? productId,int? cartId)
         {
             if(cartId is null || productId is null)
@@ -137,15 +203,7 @@ namespace ComputerNetworksProject.Controllers
 
         public async Task<IActionResult> GetCart(int? cartId)
         {
-            if (cartId is null)
-            {
-                return BadRequest("no cartId");
-            }
             var cart = await _db.Carts.FindAsync(cartId);
-            if (cart is null)
-            {
-                return BadRequest("No matching CART");
-            }
             return PartialView("_CartPartial", cart);
         }
 

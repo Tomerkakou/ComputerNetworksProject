@@ -115,43 +115,4 @@ async function selectStar(star, productId) {
 
 }
 
-async function addToCart(btn) {
-    
-    var productId = btn.getAttribute("data-product");
-    btn.disabled = true;
-    var childs=btn.querySelectorAll("span")
-    const text = childs[0];
-    text.classList.add("d-none");
-    const spiner = childs[1];
-    spiner.classList.remove("d-none");
-    const loading = childs[2];
-    loading.classList.remove("d-none");
 
-    const res = await fetch(`cart/AddItem?productId=${productId}`)
-    const data = await res.json()
-
-    const cartItemContainer = $(`#cartItem-container-${data.cartId}`)
-    if (cartItemContainer.length == 0) {
-        const cartOffCanvas = $("#cartoffcanvas")
-        if (cartOffCanvas.length == 0) {
-            console.log("error no off canvas")
-        }
-        $.ajax({
-            url: `/Cart/GetCart?cartId=${data.cartId}`,
-            type: 'GET',
-            success: function (data) {
-                cartOffCanvas.replaceWith(data)
-            },
-            error: function () {
-                console.log('Error fetching data');
-            }
-        });
-    }
-    
-
-    text.classList.remove("d-none");
-    spiner.classList.add("d-none");
-    loading.classList.add("d-none")
-    btn.disabled = false;
-
-}

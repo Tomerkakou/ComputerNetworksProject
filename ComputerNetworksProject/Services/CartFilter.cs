@@ -88,9 +88,29 @@ namespace ComputerNetworksProject.Services
                 //no cookie cart id 
                 finalCart = userCart;
             }
-            
             Controller controller = context.Controller as Controller;
-            
+
+            if (finalCart is not null)
+            {
+                var deletedCartItem=finalCart.CartItems.Where(ci=>ci.Product.ProductStatus==Product.Status.DELETED).ToList();
+                if(deletedCartItem.Count > 0) {
+                    string combinedNames = string.Join(", ", deletedCartItem.Select(ci => ci.Product.Name));
+                    controller.TempData["info"] = $"Products : {combinedNames} removed from your cart";
+                    foreach(var item in deletedCartItem)
+                    {
+                        _db.CartItems.Remove(item);
+                    }
+                    await _db.SaveChangesAsync();
+                    if(finalCart.GetItemsCount() == 0)
+                    {  
+                        _db.Carts.Remove(finalCart);
+                        await _db.SaveChangesAsync();
+                        context.HttpContext.Response.Cookies.Delete("cart_id");
+                        finalCart = null;
+                    }
+                }
+            }
+
             controller.ViewData["Cart"] = finalCart;
 
             var resultContext = await next();

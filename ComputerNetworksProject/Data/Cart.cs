@@ -115,6 +115,26 @@ namespace ComputerNetworksProject.Data
             return cartItem;
         }
 
+        public CartItem DeleteItem(int productId)
+        {
+            var cartItem = CartItems.Single(ci => ci.ProductId == productId);
+            cartItem.Product.AvailableStock += cartItem.Amount;
+            CartItems.Remove(cartItem);
+            LastUpdate = DateTime.Now;
+            return cartItem;
+        }
+
+        public List<Product> ClearCart()
+        {
+            foreach(var cartItem in CartItems)
+            {
+                cartItem.Product.AvailableStock += cartItem.Amount;
+            }
+            var products=CartItems.Select(ci => ci.Product).ToList();
+            CartItems.Clear();
+            return products;
+        }
+
 
 
     }

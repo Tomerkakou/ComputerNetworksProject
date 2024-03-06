@@ -13,7 +13,7 @@
                 <h2>No active cart</h2>
             }
     </div>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    <button type="button" id="offcanvas-close" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
     @if (Model is not null)
     {
@@ -26,19 +26,16 @@
             </div>
         </div>
         <div class="container-fluid border-top border-2 p-2">
-            <button class="btn btn-primary col-12 mb-2" type="button">Check out</button>
-            <button class="btn btn-danger col-12" type="button">Clear cart</button>
+            <button class="btn btn-primary col-12 mb-2" type="button">Check out<i class="bi bi-credit-card ms-2"></i></button>
+            <button class="btn btn-danger col-12" type="button" onclick="deleteCart()">Clear cart<i class="bi bi-trash3 ms-2"></i></button>
         </div>
+        <script>
+            document.getElementById("cartIconCount").classList.remove("d-none")
+            document.getElementById("cartIconCount").innerText = @Model.GetItemsCount()
+        </script>
     }
 </div>
-@if (Model is not null)
-{
-<script>
-    const cartIconBadge = document.getElementById("cartIconCount")
-    cartIconBadge.classList.remove("d-none")
-    cartIconBadge.innerText=@Model.GetItemsCount()
-</script>
-}
 
-<script src="~/js/Cart.js" asp-append-version="true"></script>
+
+
  
