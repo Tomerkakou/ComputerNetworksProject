@@ -34,9 +34,11 @@ namespace ComputerNetworksProject.Controllers
                 return BadRequest("not valid product id");
             }
             Cart? cart = (Cart?)ViewData["Cart"];
+            bool newCart = false;
             if(cart is null)
             {
                 cart=new Cart();
+                newCart = true;
                 await _db.Carts.AddAsync(cart);
             }
             if (_signInManager.IsSignedIn(User))
@@ -49,10 +51,31 @@ namespace ComputerNetworksProject.Controllers
             }
             try
             {
-                var cartItemAmount=cart.AddProduct(product);
+                var cartItem=cart.AddProduct(product);
                 await _db.SaveChangesAsync();
-                await _hub.Clients.All.SendAsync("productNewAvailableStock", productId, product.AvailableStock, cartItemAmount);
-                return Ok();
+                await _hub.Clients.All.SendAsync("productNewAvailableStock", productId, product.AvailableStock);
+                
+                if (newCart)
+                {
+                    if (User.Identity.Name is not null)
+                    {
+                        await _hub.Clients.Users(User.Identity.Name).SendAsync("newCart",cart.Id);
+                    }
+                    else
+                    {
+                        //reset cart expire
+                        var cookieOptions = new CookieOptions
+                        {
+                            Expires = DateTime.Now.AddDays(1),
+                        };
+                        HttpContext.Response.Cookies.Append("cart_id", cart.Id.ToString(), cookieOptions);
+                    }
+                }
+                else
+                {
+                    await _hub.Clients.All.SendAsync("cartChanged", cartItem.ProductId,cartItem.Amount, cartItem.GetPrice(), cart.Id, cart.GetTotalPrice(), cart.GetItemsCount());
+                }
+                return Ok(new {cartId=cart.Id});
             }
             catch (ArgumentException ex)
             {
@@ -77,9 +100,19 @@ namespace ComputerNetworksProject.Controllers
             }
             try
             {
-                var cartItemAmount = cart.DecreaseItemAmount((int)productId);
+                var cartItem = cart.DecreaseItemAmount((int)productId);
                 await _db.SaveChangesAsync();
-                await _hub.Clients.All.SendAsync("productNewAvailableStock", productId, product.AvailableStock,cartItemAmount);
+                await _hub.Clients.All.SendAsync("productNewAvailableStock", productId, product.AvailableStock);
+                await _hub.Clients.All.SendAsync("cartChanged", cartItem.ProductId,cartItem.Amount, cartItem.GetPrice(), cart.Id, cart.GetTotalPrice(), cart.GetItemsCount());
+                if (!User.Identity.IsAuthenticated)
+                {
+                    //reset cart expire
+                    var cookieOptions = new CookieOptions
+                    {
+                        Expires = DateTime.Now.AddDays(1),
+                    };
+                    HttpContext.Response.Cookies.Append("cart_id", cart.Id.ToString(), cookieOptions);
+                }
                 return Ok();
             }
             catch(ArgumentNullException ex)
@@ -87,5 +120,34 @@ namespace ComputerNetworksProject.Controllers
                 return BadRequest("NO such product in cart");
             }
         }
+
+        public async Task<IActionResult> GetCartItem(int? productId,int? cartId)
+        {
+            if(cartId is null || productId is null)
+            {
+                return BadRequest("no productId or cartId");
+            }
+            var cartItem = await _db.CartItems.FindAsync(cartId, productId);
+            if(cartItem is null)
+            {
+                return BadRequest("No matching caritem");
+            }
+            return PartialView("_CartItemPartial",cartItem);
+        }
+
+        public async Task<IActionResult> GetCart(int? cartId)
+        {
+            if (cartId is null)
+            {
+                return BadRequest("no cartId");
+            }
+            var cart = await _db.Carts.FindAsync(cartId);
+            if (cart is null)
+            {
+                return BadRequest("No matching CART");
+            }
+            return PartialView("_CartPartial", cart);
+        }
+
     }
 }

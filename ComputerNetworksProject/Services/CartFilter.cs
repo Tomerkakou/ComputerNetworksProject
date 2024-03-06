@@ -40,6 +40,10 @@ namespace ComputerNetworksProject.Services
             if (int.TryParse(context.HttpContext.Request.Cookies["cart_id"], out cookieCartId))
             {
                 var cookieCart = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstOrDefaultAsync(c => c.Id == cookieCartId && c.CartStatus == Cart.Status.ACTIVE);
+                if(cookieCart is null)
+                {
+                    context.HttpContext.Response.Cookies.Delete("cart_id");
+                }
                 if (user is null && cookieCart is not null && cookieCart.UserId is null)
                 {
                     //no user and cart not belong to any user
@@ -48,11 +52,13 @@ namespace ComputerNetworksProject.Services
                 else if (user is not null && cookieCart is null && userCart is not null)
                 {
                     //cookie cart is not active but usercart is active
+                    context.HttpContext.Response.Cookies.Delete("cart_id");
                     finalCart = userCart;
                 }
                 else if (user is not null && cookieCart is not null && userCart is not null && cookieCart.Id == userCart.Id)
                 {
                     //same cart
+                    context.HttpContext.Response.Cookies.Delete("cart_id");
                     finalCart = userCart;
                 }
                 else if (user is not null && cookieCart is not null && userCart is not null && cookieCart.Id != userCart.Id)
@@ -61,18 +67,17 @@ namespace ComputerNetworksProject.Services
                     if (cookieCart.UserId is null || cookieCart.UserId == user.Id)
                     {
                         //combine two carts if the cookie cart belong to that user or not belong to anyone
-                        foreach (var cartItem in cookieCart.CartItems)
-                        {
-                            cartItem.CartId = userCart.Id;
-                        }
-                        userCart.LastUpdate = DateTime.Now;
+                        userCart.MergeCart(cookieCart);
                         _db.Carts.Remove(cookieCart);
                         await _db.SaveChangesAsync();
+                        context.HttpContext.Response.Cookies.Delete("cart_id");
                         finalCart = userCart;
                     }
                 }
                 else if(user is not null && cookieCart is not null && userCart is null)
                 {
+                    //cart not belong to any user make the connection
+                    context.HttpContext.Response.Cookies.Delete("cart_id");
                     cookieCart.UserId = user.Id;
                     await _db.SaveChangesAsync();
                     finalCart= cookieCart;
@@ -116,6 +121,10 @@ namespace ComputerNetworksProject.Services
             if (int.TryParse(context.HttpContext.Request.Cookies["cart_id"], out cookieCartId))
             {
                 var cookieCart = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstOrDefaultAsync(c => c.Id == cookieCartId && c.CartStatus == Cart.Status.ACTIVE);
+                if (cookieCart is null)
+                {
+                    context.HttpContext.Response.Cookies.Delete("cart_id");
+                }
                 if (user is null && cookieCart is not null && cookieCart.UserId is null)
                 {
                     //no user and cart not belong to any user
@@ -124,11 +133,13 @@ namespace ComputerNetworksProject.Services
                 else if (user is not null && cookieCart is null && userCart is not null)
                 {
                     //cookie cart is not active but usercart is active
+                    context.HttpContext.Response.Cookies.Delete("cart_id");
                     finalCart = userCart;
                 }
                 else if (user is not null && cookieCart is not null && userCart is not null && cookieCart.Id == userCart.Id)
                 {
                     //same cart
+                    context.HttpContext.Response.Cookies.Delete("cart_id");
                     finalCart = userCart;
                 }
                 else if (user is not null && cookieCart is not null && userCart is not null && cookieCart.Id != userCart.Id)
@@ -137,15 +148,20 @@ namespace ComputerNetworksProject.Services
                     if (cookieCart.UserId is null || cookieCart.UserId == user.Id)
                     {
                         //combine two carts if the cookie cart belong to that user or not belong to anyone
-                        foreach (var cartItem in cookieCart.CartItems)
-                        {
-                            cartItem.CartId = userCart.Id;
-                        }
-                        userCart.LastUpdate = DateTime.Now;
+                        userCart.MergeCart(cookieCart);
                         _db.Carts.Remove(cookieCart);
                         await _db.SaveChangesAsync();
+                        context.HttpContext.Response.Cookies.Delete("cart_id");
                         finalCart = userCart;
                     }
+                }
+                else if (user is not null && cookieCart is not null && userCart is null)
+                {
+                    //cart not belong to any user make the connection
+                    context.HttpContext.Response.Cookies.Delete("cart_id");
+                    cookieCart.UserId = user.Id;
+                    await _db.SaveChangesAsync();
+                    finalCart = cookieCart;
                 }
             }
             else

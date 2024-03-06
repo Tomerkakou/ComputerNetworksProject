@@ -6,3 +6,5 @@ async function decreaseArrow(productId) {
     const res = await fetch(`cart/DecreaseItem?productId=${productId}`)
 
 }
+
+

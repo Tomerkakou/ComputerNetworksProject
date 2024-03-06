@@ -79,7 +79,7 @@
 
 const productsHub = new signalR.HubConnectionBuilder().withUrl("/hubs/productshub").build();
 
-productsHub.on("productNewAvailableStock", async (productId, stock, cartItemAmount) => {
+productsHub.on("productNewAvailableStock", async (productId, stock) => {
     const productCard = $(`#productCard-${productId}`)
     const productTr = $(`#productTr-${productId}`)
     if (productCard.length > 0) {
@@ -115,19 +115,50 @@ productsHub.on("productNewAvailableStock", async (productId, stock, cartItemAmou
             }
         });
     }
-    
-    const cartItemQtyParent = $(`#cartItem-qty-${productId}`)
-    if (cartItemQtyParent.length > 0 && cartItemQtyParent.children().length == 3) {
-        const leftarrow = cartItemQtyParent.children().eq(0);
-        const input = cartItemQtyParent.children().eq(1);
-        const rightarrow = cartItemQtyParent.children().eq(2);
 
-        leftarrow.prop("disabled", cartItemAmount == 1)
-        input.val(cartItemAmount)
-        rightarrow.prop("disabled",stock==0)
-       
+    const rightarrow = $(`#rightArrow-${productId}`)
+    if (rightarrow.length > 0) {
+        //not the same cart but the same product
+        rightarrow.prop("disabled", stock == 0)
     }
+});
 
+productsHub.on("cartChanged", async (productId,cartItemAmount, cartItemPrice, cartId, cartPrice, cartItemCount) => {
+    const cartItemContainer = $(`#cartItem-container-${cartId}`)
+    if (cartItemContainer.length > 0) {
+        const cartItemParent = $(`#cartItem-${productId}-${cartId}`)
+        if (cartItemParent.length > 0 && cartItemParent.children().length == 3) {
+            //same cart and cartitems exists
+            const itemPrice = cartItemParent.children().eq(1);
+            const cartItemQtyParent = cartItemParent.children().eq(2);
+            const leftarrow = cartItemQtyParent.children().eq(0);
+            const input = cartItemQtyParent.children().eq(1);
+            itemPrice.text(`${cartItemPrice}$`)
+            leftarrow.prop("disabled", cartItemAmount == 1)
+            input.val(cartItemAmount)
+        }
+        else {
+            //same cart not such item so we will send ajax call
+            $.ajax({
+                url: `/Cart/GetCartItem?productId=${productId}&cartId=${cartId}`,
+                type: 'GET',
+                success: function (data) {
+                    cartItemContainer.append(data)
+                },
+                error: function () {
+                    console.log('Error fetching data');
+                }
+            });
+            const totalItems = $("#totalItems")
+            totalItems.text(`Total items: ${cartItemCount}`);
+            const cartIconBadge = document.getElementById("cartIconCount")
+            cartIconBadge.classList.remove("d-none")
+            cartIconBadge.innerText = cartItemCount
+        }
+        
+        const totalPrice = $("#totalPrice")
+        totalPrice.text(`Total price: ${cartPrice}$`)
+    }
 });
 
 function fullfilled() {

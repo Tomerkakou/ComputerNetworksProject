@@ -140,7 +140,7 @@ namespace ComputerNetworksProject.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id,float price, float? priceDiscount, string name, string description, string categoryName, IFormFile? image, int stock,DateTime created)
+        public async Task<IActionResult> Edit(int id,float price, float? priceDiscount, string name, string? description, string categoryName, IFormFile? image, int stock,DateTime created)
         {
             var product = await _db.Products.FindAsync(id);
             if(product == null)

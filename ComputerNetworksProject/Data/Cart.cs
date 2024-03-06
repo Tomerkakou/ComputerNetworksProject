@@ -54,7 +54,31 @@ namespace ComputerNetworksProject.Data
             return CartItems.Count;
         }
 
-        public int AddProduct(Product product)
+        public void MergeCart(Cart other)
+        {
+            foreach (CartItem item in other.CartItems)
+            {
+                var cartItem = CartItems.Where(ci => ci.ProductId == item.ProductId).FirstOrDefault();
+                if(cartItem != null)
+                {
+                    cartItem.Amount++;
+                }
+                else
+                {
+                    CartItems.Add(new CartItem
+                    {
+                        ProductId = item.ProductId,
+                        Amount = item.Amount,
+                        Product=item.Product,
+                        Cart=this,
+                        CartId=item.CartId,
+                    });
+                }
+            }
+            LastUpdate = DateTime.Now;
+        }
+
+        public CartItem AddProduct(Product product)
         {
             if(product.AvailableStock<1)
             {
@@ -78,15 +102,17 @@ namespace ComputerNetworksProject.Data
                 cartItem.Amount++;
             }
             product.AvailableStock--;
-            return cartItem.Amount;
+            LastUpdate = DateTime.Now;
+            return cartItem;
         }
 
-        public int DecreaseItemAmount(int productId)
+        public CartItem DecreaseItemAmount(int productId)
         {
             var cartItem=CartItems.Single(ci=>ci.ProductId == productId);
             cartItem.Amount--;
             cartItem.Product.AvailableStock++;
-            return cartItem.Amount;
+            LastUpdate = DateTime.Now;
+            return cartItem;
         }
 
 

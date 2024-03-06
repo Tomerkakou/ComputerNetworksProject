@@ -5,8 +5,8 @@
             @if (Model is not null)
             {
                 <h3 class="offcanvas-title mb-2 col-12" id="offcanvasWithBothOptionsLabel">Cart</h3>
-                <h6 class="col-sm-6 col-12">Total items: @Model.GetItemsCount()</h6>
-                <h6 class="col-sm-6 col-12">Total price: @Model.GetTotalPrice()$</h6>
+                <h6 class="col-sm-6 col-12" id="totalItems">Total items: @Model.GetItemsCount()</h6>
+                <h6 class="col-sm-6 col-12" id="totalPrice">Total price: @Model.GetTotalPrice()$</h6>
             }
             else
             {
@@ -18,7 +18,7 @@
     @if (Model is not null)
     {
         <div class="offcanvas-body pt-0">
-            <div class="row">
+            <div class="row" id="cartItem-container-@Model.Id">
                 @foreach (var cartItem in Model.CartItems)
                 {
                     <partial name="_CartItemPartial" model="cartItem" />
@@ -31,7 +31,14 @@
         </div>
     }
 </div>
-
+@if (Model is not null)
+{
+<script>
+    const cartIconBadge = document.getElementById("cartIconCount")
+    cartIconBadge.classList.remove("d-none")
+    cartIconBadge.innerText=@Model.GetItemsCount()
+</script>
+}
 
 <script src="~/js/Cart.js" asp-append-version="true"></script>
  

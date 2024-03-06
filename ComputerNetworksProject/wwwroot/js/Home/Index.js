@@ -128,6 +128,25 @@ async function addToCart(btn) {
     loading.classList.remove("d-none");
 
     const res = await fetch(`cart/AddItem?productId=${productId}`)
+    const data = await res.json()
+
+    const cartItemContainer = $(`#cartItem-container-${data.cartId}`)
+    if (cartItemContainer.length == 0) {
+        const cartOffCanvas = $("#cartoffcanvas")
+        if (cartOffCanvas.length == 0) {
+            console.log("error no off canvas")
+        }
+        $.ajax({
+            url: `/Cart/GetCart?cartId=${data.cartId}`,
+            type: 'GET',
+            success: function (data) {
+                cartOffCanvas.replaceWith(data)
+            },
+            error: function () {
+                console.log('Error fetching data');
+            }
+        });
+    }
     
 
     text.classList.remove("d-none");
