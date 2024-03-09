@@ -1,14 +1,72 @@
-﻿async function increaseArrow(productId) {
+﻿function AddError(errorMsg) {
+    const alertPlaceholder = document.getElementById('client-error-placeholder')
+    const wrapper = document.createElement('div')
+    wrapper.innerHTML = [
+        `<div class="alert alert-warning  alert-dismissible" role="alert">`,
+        `   <i class="bi bi-exclamation-triangle"></i>`,
+        `   ${errorMsg}`,
+        '   <button type="button" class="btn-close" data-bs-dismiss="alert"></button>',
+        '</div>'
+    ].join('')
+    alertPlaceholder.append(wrapper)
+}
+
+function ClearCart() {
+    $.ajax({
+        url: `/Cart/GetCart`,
+        type: 'GET',
+        success: function (data) {
+            $("#offcanvas-close").click()
+            $("#cartoffcanvas").replaceWith(data)
+            $("#cartIconCount").addClass("d-none")
+        },
+        error: function () {
+            console.log('Error fetching data');
+        }
+    });
+}
+async function increaseArrow(productId) {
     const res = await fetch(`cart/AddItem?productId=${productId}`)
+    const data = await res.json()
+    const cartItemContainer = $(`#cartItem-container-${data.cartId}`)
+    if (cartItemContainer.length == 0) {
+        $("#offcanvas-close").click()
+        AddError("Old cart has been removed due to long idle")
+        const cartOffCanvas = $("#cartoffcanvas")
+        if (cartOffCanvas.length == 0) {
+            console.log("error no off canvas")
+        }
+        $.ajax({
+            url: `/Cart/GetCart?cartId=${data.cartId}`,
+            type: 'GET',
+            success: function (data) {
+                cartOffCanvas.replaceWith(data)
+                const badge = $("#cartIconCount")
+                badge.text(data.cartCount)
+                badge.removeClass("d-none")
+
+            },
+            error: function () {
+                console.log('Error fetching data');
+            }
+        });
+    }
 }
 
 async function decreaseArrow(productId) {
     const res = await fetch(`cart/DecreaseItem?productId=${productId}`)
-
+    if (res.status === 403) {
+        ClearCart()
+        AddError(await res.text())
+    }
 }
 
 async function deleteItem(productId) {
     const res = await fetch(`cart/DeleteItem?productId=${productId}`)
+    if (res.status === 403) {
+        ClearCart()
+        AddError(await res.text())
+    }
 }
 
 async function deleteCart() {
@@ -144,6 +202,7 @@ productsHub.on("cartChanged", async (productId, cartItemAmount, cartItemPrice, c
         totalPrice.text(`Total price: ${cartPrice}$`)
     }
 });
+
 
 productsHub.on("cartItemRemove", async (productId, cartId, cartPrice, cartItemCount) => {
     const cartItemContainer = $(`#cartItem-container-${cartId}`)

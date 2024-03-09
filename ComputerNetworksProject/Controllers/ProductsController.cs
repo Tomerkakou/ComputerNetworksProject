@@ -302,7 +302,7 @@ namespace ComputerNetworksProject.Controllers
                     _db.Notifications.Add(notification);
                     await _db.SaveChangesAsync();
                 }catch(DbUpdateException) {
-                    _logger.LogInformation($"email {userEmail} already signed to {productId}");
+                    _logger.LogInformation("email {0} already signed to {1}", userEmail, productId);
                 }
                 
                 return Content("You signed to notification successfully!");

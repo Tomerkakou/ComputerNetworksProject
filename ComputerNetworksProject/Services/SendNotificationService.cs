@@ -37,11 +37,11 @@ namespace ComputerNetworksProject.Services
             using (var scope = _service.CreateScope()) 
             {
                 var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
-                var products = await db.Notifications.Include(n => n.Product).Select(n => n.Product).Distinct().Where(p=>p.ProductStatus==Product.Status.ACTIVE).ToListAsync();
+                var products = await db.Notifications.Include(n => n.Product).Select(n => n.Product).Distinct().Where(p=>p.ProductStatus==Product.Status.ACTIVE && p.AvailableStock>0).ToListAsync();
 
                 foreach (var product in products)
                 {
-                    _logger.LogInformation($"sending notifications product {product.Id}");
+                    _logger.LogInformation("sending notifications product {}", product.Id);
                     var notifications=await db.Notifications.Where(n => n.ProductId==product.Id).ToListAsync();
                     foreach(var notfy in notifications)
                     {

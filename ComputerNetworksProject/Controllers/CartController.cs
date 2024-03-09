@@ -99,7 +99,7 @@ namespace ComputerNetworksProject.Controllers
             var product=await _db.Products.FindAsync(productId);
             if(cart is null)
             {
-                return BadRequest("No cart");
+                return StatusCode(403,"Cart has been removed due to long idle");
             }
             try
             {
@@ -133,7 +133,7 @@ namespace ComputerNetworksProject.Controllers
             }
             if(cart is null)
             {
-                return BadRequest("cart is null");
+                return StatusCode(403,"Cart has been removed due to long idle");
             }
             var cartItem = cart.DeleteItem((int)productId);
             var product=cartItem.Product;
@@ -173,7 +173,7 @@ namespace ComputerNetworksProject.Controllers
             Cart? cart = (Cart?)ViewData["Cart"];
             if (cart is null)
             {
-                return BadRequest("cart is null");
+                return Ok();
             }
             var products = cart.ClearCart();
             //delete cart

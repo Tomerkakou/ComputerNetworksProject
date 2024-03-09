@@ -32,11 +32,12 @@ namespace ComputerNetworksProject.Services
             using (var scope = _service.CreateScope()) // this will use `IServiceScopeFactory` internally
             {
                 var db = scope.ServiceProvider.GetService<ApplicationDbContext>();
-                var carts = await db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).Where(c => c.CartStatus == Cart.Status.ACTIVE).Where(c => c.LastUpdate < Constant.CartMinLastUpdate).ToListAsync();
+                var min = DateTime.Now.AddSeconds(-10);
+                var carts = await db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).Where(c => c.CartStatus == Cart.Status.ACTIVE).Where(c => c.LastUpdate < min).ToListAsync();
                 foreach (var cart in carts)
                 {
                     cart.ClearCart();
-                    _logger.LogInformation($"Clearing cart {cart.Id}");
+                    _logger.LogInformation("Clearing cart {}", cart.Id);
                     db.Carts.Remove(cart);
                 }
                 await db.SaveChangesAsync();
