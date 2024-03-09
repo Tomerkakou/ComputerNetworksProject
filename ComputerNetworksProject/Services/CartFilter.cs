@@ -1,4 +1,5 @@
 ﻿using Azure;
+using ComputerNetworksProject.Constants;
 using ComputerNetworksProject.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -47,6 +48,11 @@ namespace ComputerNetworksProject.Services
                 if (user is null && cookieCart is not null && cookieCart.UserId is null)
                 {
                     //no user and cart not belong to any user
+                    var cookieOptions = new CookieOptions
+                    {
+                        Expires = Constant.CookieOffset,
+                    };
+                    context.HttpContext.Response.Cookies.Append("cart_id", cookieCartId.ToString(), cookieOptions);
                     finalCart = cookieCart;
                 }
                 else if (user is not null && cookieCart is null && userCart is not null)
@@ -92,6 +98,8 @@ namespace ComputerNetworksProject.Services
 
             if (finalCart is not null)
             {
+                finalCart.LastUpdate=DateTime.Now;
+                await _db.SaveChangesAsync();
                 var deletedCartItem=finalCart.CartItems.Where(ci=>ci.Product.ProductStatus==Product.Status.DELETED).ToList();
                 if(deletedCartItem.Count > 0) {
                     string combinedNames = string.Join(", ", deletedCartItem.Select(ci => ci.Product.Name));
@@ -148,6 +156,11 @@ namespace ComputerNetworksProject.Services
                 if (user is null && cookieCart is not null && cookieCart.UserId is null)
                 {
                     //no user and cart not belong to any user
+                    var cookieOptions = new CookieOptions
+                    {
+                        Expires = Constant.CookieOffset,
+                    };
+                    context.HttpContext.Response.Cookies.Append("cart_id", cookieCartId.ToString(), cookieOptions);
                     finalCart = cookieCart;
                 }
                 else if (user is not null && cookieCart is null && userCart is not null)
@@ -191,6 +204,30 @@ namespace ComputerNetworksProject.Services
             }
 
             PageModel pagemodel = context.HandlerInstance as PageModel;
+
+            if (finalCart is not null)
+            {
+                finalCart.LastUpdate = DateTime.Now;
+                await _db.SaveChangesAsync();
+                var deletedCartItem = finalCart.CartItems.Where(ci => ci.Product.ProductStatus == Product.Status.DELETED).ToList();
+                if (deletedCartItem.Count > 0)
+                {
+                    //string combinedNames = string.Join(", ", deletedCartItem.Select(ci => ci.Product.Name));
+                    //pagemodel.TempData["info"] = $"Products : {combinedNames} removed from your cart";
+                    foreach (var item in deletedCartItem)
+                    {
+                        _db.CartItems.Remove(item);
+                    }
+                    await _db.SaveChangesAsync();
+                    if (finalCart.GetItemsCount() == 0)
+                    {
+                        _db.Carts.Remove(finalCart);
+                        await _db.SaveChangesAsync();
+                        context.HttpContext.Response.Cookies.Delete("cart_id");
+                        finalCart = null;
+                    }
+                }
+            }
 
             pagemodel.ViewData["Cart"] = finalCart;
 

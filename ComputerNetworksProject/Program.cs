@@ -4,7 +4,6 @@ using ComputerNetworksProject.Models;
 using ComputerNetworksProject.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,17 +25,17 @@ builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.Requi
     .AddPasswordValidator<UsernameAsPasswordValidator>();
 
 builder.Services.AddScoped<CartFilter>();
-
 builder.Services.AddRazorPages().AddMvcOptions(options => options.Filters.Add(typeof(CartFilter)));
-builder.Services.AddControllersWithViews(options => options.Filters.Add(typeof(CartFilter)));
+//builder.Services.AddControllersWithViews(options => options.Filters.Add(typeof(CartFilter)));
 
 builder.Services.Configure <EmailSettings>
    (options => builder.Configuration.GetSection("EmailSettings").Bind(options));
-
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
 builder.Services.AddSignalR();
 builder.Services.AddSession(options=>options.IdleTimeout=TimeSpan.FromMinutes(60));
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddHostedService<CartReleaseService>();
+builder.Services.AddHostedService<SendNotificationService>();
 
 var app = builder.Build();
 

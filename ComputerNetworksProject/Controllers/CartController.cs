@@ -1,4 +1,5 @@
-﻿using ComputerNetworksProject.Data;
+﻿using ComputerNetworksProject.Constants;
+using ComputerNetworksProject.Data;
 using ComputerNetworksProject.Hubs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -68,7 +69,7 @@ namespace ComputerNetworksProject.Controllers
                         //reset cart expire
                         var cookieOptions = new CookieOptions
                         {
-                            Expires = DateTime.Now.AddDays(1),
+                            Expires = Constant.CookieOffset,
                         };
                         HttpContext.Response.Cookies.Append("cart_id", cart.Id.ToString(), cookieOptions);
                     }
@@ -111,7 +112,7 @@ namespace ComputerNetworksProject.Controllers
                     //reset cart expire
                     var cookieOptions = new CookieOptions
                     {
-                        Expires = DateTime.Now.AddDays(1),
+                        Expires = Constant.CookieOffset,
                     };
                     HttpContext.Response.Cookies.Append("cart_id", cart.Id.ToString(), cookieOptions);
                 }
@@ -155,7 +156,7 @@ namespace ComputerNetworksProject.Controllers
                     //reset cart expire
                     var cookieOptions = new CookieOptions
                     {
-                        Expires = DateTime.Now.AddDays(1),
+                        Expires = Constant.CookieOffset,
                     };
                     HttpContext.Response.Cookies.Append("cart_id", cart.Id.ToString(), cookieOptions);
                 }

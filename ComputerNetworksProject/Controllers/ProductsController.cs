@@ -287,6 +287,29 @@ namespace ComputerNetworksProject.Controllers
             return "unknown";
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Notify(int productId,string userEmail)
+        {
+            if(ModelState.IsValid)
+            {
+                var notification = new Notification
+                {
+                    ProductId = productId,
+                    Email = userEmail.ToUpper(),
+                };
+                try
+                {
+                    _db.Notifications.Add(notification);
+                    await _db.SaveChangesAsync();
+                }catch(DbUpdateException) {
+                    _logger.LogInformation($"email {userEmail} already signed to {productId}");
+                }
+                
+                return Content("You signed to notification successfully!");
+            }
+            return BadRequest("Invalid email address or productId");
+        }
+
 
     }
 }

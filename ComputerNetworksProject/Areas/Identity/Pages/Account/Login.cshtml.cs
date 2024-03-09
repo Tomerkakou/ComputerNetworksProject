@@ -103,7 +103,6 @@ namespace ComputerNetworksProject.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            ViewData["Cart"] = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstAsync();
             returnUrl ??= Url.Content("~/");
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();

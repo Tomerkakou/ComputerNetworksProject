@@ -36,6 +36,6 @@
         <button class="btn btn-primary btn-sm">Buy now</button> 
     }
     else{
-        <button class="btn btn-primary btn-sm">Notify</button>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#NotifyModal" onclick="updateModal(@Model.Id,'@Model.Name')">Notify</button>
     }
 </td>

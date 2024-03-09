@@ -115,4 +115,30 @@ async function selectStar(star, productId) {
 
 }
 
+function updateModal(productId,productName) {
+    $("#notify-productId").val(productId)
+    $("#notify-product-name").text(productName)
+}
+
+async function RegisterNotify() {    
+    const userEmail = $("#notify-userEmail").val();
+    if (userEmail === null || userEmail == '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail)) {
+        $("#notify-userEmail").addClass("is-invalid")
+        return;
+    }
+    const formData = $('#notify-form').serialize();
+    $.ajax({
+        type: 'POST',
+        url: '/products/notify',
+        data: formData,
+        success: function (response) {
+            $('#NotifyModal').modal('hide');
+            alert(response)
+        },
+        error: function (error) {
+            console.error('Error:', error);
+        }
+    });
+}
+
 
