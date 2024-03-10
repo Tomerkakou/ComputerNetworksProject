@@ -1,0 +1,83 @@
+﻿@model ComputerNetworksProject.Data.Cart
+@{
+    ViewData["Title"] = "Order Review";
+}
+<div class="container">
+    <div class="row fw-bold d-flex justify-content-center">
+        <div class="col-sm-1 col-2 rounded-circle bg-success  bg-opacity-75 p-2 text-center">
+            <i class="bi bi-card-checklist fs-5"></i>
+        </div>
+        <div class="col-sm-2 col-1 p-0 pt-2">
+            <hr class="border border border-secondary border-2 h-0" />
+        </div>
+        <div class="col-sm-1 col-2 rounded-circle bg-secondary bg-opacity-75 p-2 text-center">
+            <i class="bi bi-truck fs-5"></i>
+        </div>
+        <div class="col-sm-2 col-1 p-0 pt-2">
+            <hr class="border border border-secondary border-2 h-0" />
+        </div>
+        <div class="col-sm-1 col-2 rounded-circle bg-secondary bg-opacity-75 p-2 text-center">
+            <i class="bi bi-credit-card fs-5"></i>
+        </div>
+        <div class="col-sm-2 col-1 p-0 pt-2">
+            <hr class="border border border-secondary border-2 h-0" />
+        </div>
+        <div class="col-sm-1 col-2 rounded-circle bg-secondary bg-opacity-75 p-2 text-center">
+            <i class="bi bi-patch-check fs-5"></i>
+        </div>
+    </div>
+    <div class="row mt-5 mb-3">
+        <div class="col-12 fw-bold d-flex justify-content-around my-3">
+            <span>Total items: @Model.GetItemsCount()</span><span>Total price: @Model.GetTotalPrice()$</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle  text-center">
+                <thead class="table-primary">
+                    <tr>
+                        <th scope="col">Image</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Total price</th>
+                    </tr>
+                </thead>
+                <tbody class="fw-semibold">
+
+                    @foreach(var cartItem in Model.CartItems)
+                    {
+                        string imgSrc = "";
+                        if (cartItem.Product is not null && cartItem.Product.Img is not null && cartItem.Product.ImgType is not null)
+                        {
+                            imgSrc = String.Format("data:image/{0};base64,{1}", cartItem.Product.ImgType, Convert.ToBase64String(cartItem.Product.Img));
+                        }
+                        <tr>
+                            <td>
+                                <img src="@imgSrc" class="bg-white" style="object-fit:contain; width:7rem; aspect-ratio: 1.5 / 1;" />
+                            </td>
+                            <td>
+                                @cartItem.Product.Name
+                            </td>
+                            <td>
+                                @(cartItem.Product.PriceDiscount ?? cartItem.Product.Price)$
+                            </td>
+                            <td>
+                                @cartItem.Amount
+                            </td>
+                            <td>
+                                @cartItem.GetPrice()
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row p-2 mb-3">
+        <div class="col-6 d-grid d-block">
+            <button class="btn btn-secondary" disabled>Back</button>
+        </div>
+        <div class="col-6 d-grid d-block">
+            <a asp-controller="Checkout" asp-action="Shipping"  class="btn btn-success">Next</a>
+        </div>
+    </div>
+</div>

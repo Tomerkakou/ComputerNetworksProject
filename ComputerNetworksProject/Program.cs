@@ -34,6 +34,7 @@ builder.Services.AddSingleton<IEmailSender, EmailSender>();
 builder.Services.AddSignalR();
 builder.Services.AddSession(options=>options.IdleTimeout=TimeSpan.FromMinutes(60));
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddSingleton<AesEncrypter, AesEncrypter>();
 builder.Services.AddHostedService<CartReleaseService>();
 builder.Services.AddHostedService<SendNotificationService>();
 

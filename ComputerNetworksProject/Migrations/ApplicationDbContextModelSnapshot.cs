@@ -36,10 +36,15 @@ namespace ComputerNetworksProject.Migrations
                     b.Property<DateTime>("LastUpdate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("PaymentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PaymentId");
 
                     b.HasIndex("UserId");
 
@@ -89,13 +94,47 @@ namespace ComputerNetworksProject.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("ComputerNetworksProject.Data.Payment", b =>
+            modelBuilder.Entity("ComputerNetworksProject.Data.Order", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CartId")
                         .HasColumnType("int");
+
+                    b.Property<int>("PaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ShippingId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CartId")
+                        .IsUnique();
+
+                    b.HasIndex("PaymentId");
+
+                    b.HasIndex("ShippingId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("ComputerNetworksProject.Data.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<byte[]>("CreditCardNumberEncrypt")
                         .HasColumnType("varbinary(max)");
@@ -114,10 +153,7 @@ namespace ComputerNetworksProject.Migrations
                     b.Property<int>("YearExp")
                         .HasColumnType("int");
 
-                    b.HasKey("UserId", "CartId");
-
-                    b.HasIndex("CartId")
-                        .IsUnique();
+                    b.HasKey("Id");
 
                     b.ToTable("Payments");
                 });
@@ -195,6 +231,42 @@ namespace ComputerNetworksProject.Migrations
                     b.ToTable("Rate");
                 });
 
+            modelBuilder.Entity("ComputerNetworksProject.Data.Shipping", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ApartmentNum")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BuildingNum")
+                        .HasColumnType("int");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ZipCode")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("nvarchar(7)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Shippings");
+                });
+
             modelBuilder.Entity("ComputerNetworksProject.Data.User", b =>
                 {
                     b.Property<string>("Id")
@@ -240,6 +312,9 @@ namespace ComputerNetworksProject.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("PaymentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -251,6 +326,9 @@ namespace ComputerNetworksProject.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ShippingId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -268,6 +346,10 @@ namespace ComputerNetworksProject.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("PaymentId");
+
+                    b.HasIndex("ShippingId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -407,16 +489,22 @@ namespace ComputerNetworksProject.Migrations
 
             modelBuilder.Entity("ComputerNetworksProject.Data.Cart", b =>
                 {
+                    b.HasOne("ComputerNetworksProject.Data.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId");
+
                     b.HasOne("ComputerNetworksProject.Data.User", "User")
-                        .WithMany("Carts")
+                        .WithMany()
                         .HasForeignKey("UserId");
+
+                    b.Navigation("Payment");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("ComputerNetworksProject.Data.CartItem", b =>
                 {
-                    b.HasOne("ComputerNetworksProject.Data.Cart", "Cart")
+                    b.HasOne("ComputerNetworksProject.Data.Cart", null)
                         .WithMany("CartItems")
                         .HasForeignKey("CartId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -427,8 +515,6 @@ namespace ComputerNetworksProject.Migrations
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Cart");
 
                     b.Navigation("Product");
                 });
@@ -444,23 +530,35 @@ namespace ComputerNetworksProject.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("ComputerNetworksProject.Data.Payment", b =>
+            modelBuilder.Entity("ComputerNetworksProject.Data.Order", b =>
                 {
                     b.HasOne("ComputerNetworksProject.Data.Cart", "Cart")
-                        .WithOne("Payment")
-                        .HasForeignKey("ComputerNetworksProject.Data.Payment", "CartId")
+                        .WithMany()
+                        .HasForeignKey("CartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ComputerNetworksProject.Data.User", "User")
-                        .WithMany("Payments")
-                        .HasForeignKey("UserId")
+                    b.HasOne("ComputerNetworksProject.Data.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("ComputerNetworksProject.Data.Shipping", "Shipping")
+                        .WithMany()
+                        .HasForeignKey("ShippingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ComputerNetworksProject.Data.User", null)
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Cart");
 
-                    b.Navigation("User");
+                    b.Navigation("Payment");
+
+                    b.Navigation("Shipping");
                 });
 
             modelBuilder.Entity("ComputerNetworksProject.Data.Product", b =>
@@ -481,6 +579,21 @@ namespace ComputerNetworksProject.Migrations
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ComputerNetworksProject.Data.User", b =>
+                {
+                    b.HasOne("ComputerNetworksProject.Data.Payment", "SavedPayment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId");
+
+                    b.HasOne("ComputerNetworksProject.Data.Shipping", "SavedShipping")
+                        .WithMany()
+                        .HasForeignKey("ShippingId");
+
+                    b.Navigation("SavedPayment");
+
+                    b.Navigation("SavedShipping");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -537,8 +650,6 @@ namespace ComputerNetworksProject.Migrations
             modelBuilder.Entity("ComputerNetworksProject.Data.Cart", b =>
                 {
                     b.Navigation("CartItems");
-
-                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("ComputerNetworksProject.Data.Product", b =>
@@ -548,9 +659,7 @@ namespace ComputerNetworksProject.Migrations
 
             modelBuilder.Entity("ComputerNetworksProject.Data.User", b =>
                 {
-                    b.Navigation("Carts");
-
-                    b.Navigation("Payments");
+                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }

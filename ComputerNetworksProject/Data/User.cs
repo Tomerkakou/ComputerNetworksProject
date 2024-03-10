@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Build.Framework;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ComputerNetworksProject.Data
 {
@@ -12,8 +13,14 @@ namespace ComputerNetworksProject.Data
         public byte[]? ProfilePicture { get; set; }
         public string? ImgType { get; set; }
 
-        public ICollection<Payment>? Payments { get; set; }
+        [ForeignKey("PaymentId")]
+        public int? PaymentId { get; set; }
+        public Payment? SavedPayment { get; set; }
 
-        public ICollection<Cart>? Carts { get; set; }
+        [ForeignKey("ShippingId")]
+        public int? ShippingId { get; set; }
+        public Shipping? SavedShipping { get; set; }
+
+        public ICollection<Order>? Orders { get; set; }
     }
 }

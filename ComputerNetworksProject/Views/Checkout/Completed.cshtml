@@ -1,0 +1,50 @@
+﻿@model ComputerNetworksProject.Data.Order
+@{
+    ViewData["Title"] = "Order Completed";
+}
+<div class="container">
+    <div class="row fw-bold d-flex justify-content-center">
+        <div class="col-sm-1 col-2 rounded-circle bg-success  bg-opacity-75 p-2 text-center">
+            <i class="bi bi-card-checklist fs-5"></i>
+        </div>
+        <div class="col-sm-2 col-1 p-0 pt-2">
+            <hr class="border border border-success border-2 h-0" />
+        </div>
+        <div class="col-sm-1 col-2 rounded-circle bg-success bg-opacity-75 p-2 text-center">
+            <i class="bi bi-truck fs-5"></i>
+        </div>
+        <div class="col-sm-2 col-1 p-0 pt-2">
+            <hr class="border border border-success border-2 h-0" />
+        </div>
+        <div class="col-sm-1 col-2 rounded-circle bg-success bg-opacity-75 p-2 text-center">
+            <i class="bi bi-credit-card fs-5"></i>
+        </div>
+        <div class="col-sm-2 col-1 p-0 pt-2">
+            <hr class="border border border-success border-2 h-0" />
+        </div>
+        <div class="col-sm-1 col-2 rounded-circle bg-success bg-opacity-75 p-2 text-center">
+            <i class="bi bi-patch-check fs-5"></i>
+        </div>
+    </div>
+    <div class="row mt-5 mb-3 p-2">
+        <div class="col-12 d-flex justify-content-center align-content-center">
+            <i class="bi bi-check-circle-fill text-success text-opacity-50" style="font-size:7rem;"></i>
+        </div>
+        <div class="col-12 d-flex justify-content-center align-content-center">
+            <h3>Order Completed successfully!</h3>
+        </div>
+        <div class="row d-grid gap-2 mt-4 fw-semibold fs-5">
+            <span>Order Number: @Model.Id</span>
+            <span>Order total items: @Model.Cart.GetItemsCount()</span>
+            <span>Order total price: @Model.Cart.GetTotalPrice()$</span>
+        </div>
+        <div class="col-12 d-flex justify-content-center align-content-center mt-2">
+            <a class="icon-link" asp-controller="Home" asp-action="Index">
+                Go back shopping
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+

@@ -19,21 +19,12 @@ namespace ComputerNetworksProject.Data
         [ForeignKey("ProductId")]
         [Required]
         public Product Product { get; set; }
-        
-        public int CartId { get; set; }
 
         [ForeignKey("CartId")]
         [Required]
-        public Cart Cart { get; set; }
+        public int CartId { get; set; }
 
         public CartItem() { }
-        public CartItem(Product product, Cart cart) :this()
-        {
-            Product = product;
-            ProductId=product.Id;
-            CartId = cart.Id;
-            Cart = cart;
-        }
 
         public float GetPrice()
         {

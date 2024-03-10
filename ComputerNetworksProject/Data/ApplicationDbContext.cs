@@ -9,6 +9,8 @@ namespace ComputerNetworksProject.Data
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<Shipping> Shippings { get; set; }
+        public DbSet<Order> Orders { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
@@ -20,6 +22,7 @@ namespace ComputerNetworksProject.Data
                 .WithMany()
                 .HasForeignKey(p => p.CategoryName)
                 .OnDelete(DeleteBehavior.NoAction);
+
         }
     }
 }

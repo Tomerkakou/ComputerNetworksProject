@@ -1,0 +1,92 @@
+﻿@model ComputerNetworksProject.Data.Shipping
+@using ComputerNetworksProject.Data;
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+@{
+    ViewData["Title"] = "Shipping";
+}
+<div class="container">
+    <div class="row fw-bold d-flex justify-content-center">
+        <div class="col-sm-1 col-2 rounded-circle bg-success  bg-opacity-75 p-2 text-center">
+            <i class="bi bi-card-checklist fs-5"></i>
+        </div>
+        <div class="col-sm-2 col-1 p-0 pt-2">
+            <hr class="border border border-success border-2 h-0" />
+        </div>
+        <div class="col-sm-1 col-2 rounded-circle bg-success bg-opacity-75 p-2 text-center">
+            <i class="bi bi-truck fs-5"></i>
+        </div>
+        <div class="col-sm-2 col-1 p-0 pt-2">
+            <hr class="border border border-secondary border-2 h-0" />
+        </div>
+        <div class="col-sm-1 col-2 rounded-circle bg-secondary bg-opacity-75 p-2 text-center">
+            <i class="bi bi-credit-card fs-5"></i>
+        </div>
+        <div class="col-sm-2 col-1 p-0 pt-2">
+            <hr class="border border border-secondary border-2 h-0" />
+        </div>
+        <div class="col-sm-1 col-2 rounded-circle bg-secondary bg-opacity-75 p-2 text-center">
+            <i class="bi bi-patch-check fs-5"></i>
+        </div>
+    </div>
+    <form asp-action="Shipping">
+    <div class="row mt-5 mb-3 p-2">
+            <div class="col-md-6 mb-2">
+                <label asp-for="Country" class="form-label">Country:</label>
+                <input asp-for="Country" class="form-control" />
+                <span asp-validation-for="Country" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-2">
+                <label asp-for="City" class="form-label">City:</label>
+                <input asp-for="City" class="form-control" />
+                <span asp-validation-for="City" class="text-danger"></span>
+            </div>
+            <div class="col-md-12 mb-2">
+                <label asp-for="Address" class="form-label">Address:</label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 col-6 mb-2">
+                <label asp-for="BuildingNum" class="form-label">Building number:</label>
+                <input asp-for="BuildingNum" class="form-control" />
+                <span asp-validation-for="BuildingNum" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 col-6 mb-2">
+                <label asp-for="ApartmentNum" class="form-label">Apartment number:</label>
+                <input asp-for="ApartmentNum" class="form-control" />
+                <span asp-validation-for="ApartmentNum" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 mb-2">
+                <label asp-for="ZipCode" class="form-label">Zip code:</label>
+                <input asp-for="ZipCode" class="form-control" />
+                <span asp-validation-for="ZipCode" class="text-danger"></span>
+            </div>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <div class="col-12 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" asp-for="Save" type="checkbox">
+                        <label class="form-check-label" asp-for="Save">
+                            Save shipping data
+                        </label>
+                    </div>
+                </div>
+            }   
+    </div>
+    <div class="row p-2 mb-3">
+        <div class="col-6 d-grid d-block">
+             <a asp-action="Review" asp-controller="Checkout" class="btn btn-secondary">Back</a>
+        </div>
+        <div class="col-6 d-grid d-block">
+            <input type="submit" class="btn btn-success" value="Next"></input>
+        </div>
+    </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

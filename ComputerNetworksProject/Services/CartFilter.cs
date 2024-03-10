@@ -1,5 +1,6 @@
 ﻿
 using ComputerNetworksProject.Constants;
+using ComputerNetworksProject.Controllers;
 using ComputerNetworksProject.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -117,6 +118,12 @@ namespace ComputerNetworksProject.Services
                         finalCart = null;
                     }
                 }
+            }
+            if(controller is not CheckoutController)
+            {
+                controller.TempData.Remove("checkout-cart2");
+                controller.TempData.Remove("checkout-shipping2");
+                controller.TempData.Remove("checkout-payment2");
             }
 
             controller.ViewData["Cart"] = finalCart;

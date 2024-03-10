@@ -70,7 +70,6 @@ namespace ComputerNetworksProject.Data
                         ProductId = item.ProductId,
                         Amount = item.Amount,
                         Product=item.Product,
-                        Cart=this,
                         CartId=item.CartId,
                     });
                 }
@@ -93,7 +92,6 @@ namespace ComputerNetworksProject.Data
                     Product = product,
                     ProductId = product.Id,
                     CartId = Id,
-                    Cart = this,
                 };
                 CartItems.Add(cartItem);
             }
@@ -133,6 +131,15 @@ namespace ComputerNetworksProject.Data
             var products=CartItems.Select(ci => ci.Product).ToList();
             CartItems.Clear();
             return products;
+        }
+
+        public void CompleteCart()
+        {
+            foreach (var cartItem in CartItems)
+            {
+                cartItem.Product.Stock -= cartItem.Amount;
+            }
+            CartStatus=Status.COMPLETED;
         }
 
 
