@@ -165,6 +165,27 @@ productsHub.on("productNewAvailableStock", async (productId, stock) => {
     }
 });
 
+productsHub.on("newCart", async (cartId) => {
+    console.log("test")
+    const cartOffCanvas = $("#cartoffcanvas")
+    if (cartOffCanvas.length == 0) {
+        console.log("error no off canvas")
+    }
+    $.ajax({
+        url: `/Cart/GetCart?cartId=${cartId}`,
+        type: 'GET',
+        success: function (data) {
+            cartOffCanvas.replaceWith(data)
+            const badge = $("#cartIconCount")
+            badge.text(data.cartCount)
+            badge.removeClass("d-none")
+        },
+        error: function () {
+            console.log('Error fetching data');
+        }
+    });
+})
+
 productsHub.on("cartChanged", async (productId, cartItemAmount, cartItemPrice, cartId, cartPrice, cartItemCount) => {
     const cartItemContainer = $(`#cartItem-container-${cartId}`)
     if (cartItemContainer.length > 0) {

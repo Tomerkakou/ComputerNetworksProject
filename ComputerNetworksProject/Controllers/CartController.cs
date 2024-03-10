@@ -60,9 +60,13 @@ namespace ComputerNetworksProject.Controllers
                 
                 if (newCart)
                 {
-                    if (User.Identity.Name is not null)
+                    if (_signInManager.IsSignedIn(User))
                     {
-                        await _hub.Clients.Users(User.Identity.Name).SendAsync("newCart",cart.Id);
+                        var user = await _userManager.GetUserAsync(User);
+                        if (user is not null)
+                        {
+                            await _hub.Clients.Users(user.Id).SendAsync("newCart", cart.Id);
+                        }
                     }
                     else
                     {
