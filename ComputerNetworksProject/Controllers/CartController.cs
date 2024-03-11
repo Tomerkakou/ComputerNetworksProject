@@ -212,5 +212,43 @@ namespace ComputerNetworksProject.Controllers
             return PartialView("_CartPartial", cart);
         }
 
+        public async Task<IActionResult> BuyNow(int productId)
+        {
+            var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == productId);
+            if (product is null)
+            {
+                return BadRequest("not valid product id");
+            }
+
+            var cart = new Cart();
+            cart.BuyNow = true;
+            await _db.Carts.AddAsync(cart);
+            
+            if (_signInManager.IsSignedIn(User))
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user is not null)
+                {
+                    cart.UserId = user.Id;
+                }
+            }
+            try
+            {
+                var cartItem = cart.AddProduct(product);
+                await _db.SaveChangesAsync();
+                await _hub.Clients.All.SendAsync("productNewAvailableStock", productId, product.AvailableStock);
+
+                return RedirectToAction("Review","Checkout",new {cartId=cart.Id});
+            }
+            catch (ArgumentException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (DbUpdateException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

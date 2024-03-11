@@ -11,6 +11,18 @@
     alertPlaceholder.append(wrapper)
 }
 
+function AddErrorNoClose(errorMsg) {
+    const alertPlaceholder = document.getElementById('client-error-placeholder')
+    const wrapper = document.createElement('div')
+    wrapper.innerHTML = [
+        `<div class="alert alert-danger  alert-dismissible" role="alert">`,
+        `   <i class="bi bi-exclamation-triangle"></i>`,
+        `   ${errorMsg}`,
+        '</div>'
+    ].join('')
+    alertPlaceholder.append(wrapper)
+}
+
 function ClearCart() {
     $.ajax({
         url: `/Cart/GetCart`,
@@ -258,6 +270,28 @@ productsHub.on("clearCart", async (cartId) => {
                 console.log('Error fetching data');
             }
         });
+    }
+})
+
+productsHub.on("productPriceChanged", async (cardIds) => {
+    var currentUrl = window.location.href;
+    for (const cartId of cardIds) {
+        if (currentUrl.includes('Checkout') && currentUrl.includes(`cartId=${cartId}`)){
+            if(currentUrl.includes('Review')) {
+                location.reload()
+                return
+            }
+            $("#checkout-back")?.addClass("disabled")
+            $("#checkout-next")?.prop("disabled", true)
+            $("#checkout-samePayment")?.prop("disabled", true)
+            reviewUrl = currentUrl.replace("Shipping", "Review").replace("Payment", "Review")
+            const html =`Admin changed the price of product in your cart please go back and 
+                        <a class="ms-1 icon-link icon-link-hover" href="${reviewUrl}">
+                          Review your cart again
+                          <i class="bi bi-arrow-right"></i>
+                        </a>`
+            AddErrorNoClose(html)
+        }
     }
 })
 

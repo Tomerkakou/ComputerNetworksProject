@@ -31,57 +31,58 @@
         </div>
     </div>
     <form asp-action="Shipping">
-    <div class="row mt-5 mb-3 p-2">
-            <div class="col-md-6 mb-2">
-                <label asp-for="Country" class="form-label">Country:</label>
-                <input asp-for="Country" class="form-control" />
-                <span asp-validation-for="Country" class="text-danger"></span>
-            </div>
-            <div class="col-md-6 mb-2">
-                <label asp-for="City" class="form-label">City:</label>
-                <input asp-for="City" class="form-control" />
-                <span asp-validation-for="City" class="text-danger"></span>
-            </div>
-            <div class="col-md-12 mb-2">
-                <label asp-for="Address" class="form-label">Address:</label>
-                <input asp-for="Address" class="form-control" />
-                <span asp-validation-for="Address" class="text-danger"></span>
-            </div>
-            <div class="col-md-4 col-6 mb-2">
-                <label asp-for="BuildingNum" class="form-label">Building number:</label>
-                <input asp-for="BuildingNum" class="form-control" />
-                <span asp-validation-for="BuildingNum" class="text-danger"></span>
-            </div>
-            <div class="col-md-4 col-6 mb-2">
-                <label asp-for="ApartmentNum" class="form-label">Apartment number:</label>
-                <input asp-for="ApartmentNum" class="form-control" />
-                <span asp-validation-for="ApartmentNum" class="text-danger"></span>
-            </div>
-            <div class="col-md-4 mb-2">
-                <label asp-for="ZipCode" class="form-label">Zip code:</label>
-                <input asp-for="ZipCode" class="form-control" />
-                <span asp-validation-for="ZipCode" class="text-danger"></span>
-            </div>
-            @if (SignInManager.IsSignedIn(User))
-            {
-                <div class="col-12 mb-2">
-                    <div class="form-check">
-                        <input class="form-check-input" asp-for="Save" type="checkbox">
-                        <label class="form-check-label" asp-for="Save">
-                            Save shipping data
-                        </label>
-                    </div>
+        <input name="cartId" type="hidden" value="@ViewBag.CartId"/>
+        <div class="row mt-5 mb-3 p-2">
+                <div class="col-md-6 mb-2">
+                    <label asp-for="Country" class="form-label">Country:</label>
+                    <input asp-for="Country" class="form-control" />
+                    <span asp-validation-for="Country" class="text-danger"></span>
                 </div>
-            }   
-    </div>
-    <div class="row p-2 mb-3">
-        <div class="col-6 d-grid d-block">
-             <a asp-action="Review" asp-controller="Checkout" class="btn btn-secondary">Back</a>
+                <div class="col-md-6 mb-2">
+                    <label asp-for="City" class="form-label">City:</label>
+                    <input asp-for="City" class="form-control" />
+                    <span asp-validation-for="City" class="text-danger"></span>
+                </div>
+                <div class="col-md-12 mb-2">
+                    <label asp-for="Address" class="form-label">Address:</label>
+                    <input asp-for="Address" class="form-control" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 col-6 mb-2">
+                    <label asp-for="BuildingNum" class="form-label">Building number:</label>
+                    <input asp-for="BuildingNum" class="form-control" />
+                    <span asp-validation-for="BuildingNum" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 col-6 mb-2">
+                    <label asp-for="ApartmentNum" class="form-label">Apartment number:</label>
+                    <input asp-for="ApartmentNum" class="form-control" />
+                    <span asp-validation-for="ApartmentNum" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label asp-for="ZipCode" class="form-label">Zip code:</label>
+                    <input asp-for="ZipCode" class="form-control" />
+                    <span asp-validation-for="ZipCode" class="text-danger"></span>
+                </div>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <div class="col-12 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="Save" type="checkbox">
+                            <label class="form-check-label" asp-for="Save">
+                                Save shipping data
+                            </label>
+                        </div>
+                    </div>
+                }   
         </div>
-        <div class="col-6 d-grid d-block">
-            <input type="submit" class="btn btn-success" value="Next"></input>
+        <div class="row p-2 mb-3">
+            <div class="col-6 d-grid d-block">
+                 <a asp-action="Review" asp-controller="Checkout" asp-route-cartId="@ViewBag.CartId" asp-route-shippingId="@Model.Id" class="btn btn-secondary">Back</a>
+            </div>
+            <div class="col-6 d-grid d-block">
+                <input type="submit" class="btn btn-success" id="checkout-next" value="Next"></input>
+            </div>
         </div>
-    </div>
     </form>
 </div>
 

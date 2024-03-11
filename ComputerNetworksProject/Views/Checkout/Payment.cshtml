@@ -4,7 +4,12 @@
 @inject SignInManager<User> SignInManager
 @inject UserManager<User> UserManager
 @{
+    User? user = null;
     ViewData["Title"] = "Payment";
+    if (SignInManager.IsSignedIn(User))
+    {
+        user = await UserManager.GetUserAsync(User);
+    }
 }
 <div class="container">
     <div class="row fw-bold d-flex justify-content-center">
@@ -30,48 +35,107 @@
             <i class="bi bi-patch-check fs-5"></i>
         </div>
     </div>
-    <form asp-action="Payment">
-    <div class="row mt-5 mb-3 p-2">
-            <div class="col-12 mb-2">
-                <label asp-for="CreditCardNumber" class="form-label">Credit Card Number:</label>
-                <input asp-for="CreditCardNumber" class="form-control" placeholder="XXXX-XXXX-XXXX-XXXX"/>
-                <span asp-validation-for="CreditCardNumber" class="text-danger"></span>
-            </div>
-            <div class="col-md-4 col-6 mb-2">
-                <label asp-for="MonthExp" class="form-label">Expires Month:</label>
-                <input asp-for="MonthExp" class="form-control" />
-                <span asp-validation-for="MonthExp" class="text-danger"></span>
-            </div>
-            <div class="col-md-4 col-6 mb-2">
-                <label asp-for="YearExp" class="form-label">Expires Year:</label>
-                <input asp-for="YearExp" class="form-control" />
-                <span asp-validation-for="YearExp" class="text-danger"></span>
-            </div>
-            <div class="col-md-4 col-6 mb-2">
-                <label asp-for="Cvv" class="form-label">CVV:</label>
-                <input asp-for="Cvv" class="form-control" />
-                <span asp-validation-for="Cvv" class="text-danger"></span>
-            </div>
-            @if (SignInManager.IsSignedIn(User))
-            {
-                <div class="col-12 mb-2">
-                    <div class="form-check">
-                        <input class="form-check-input" asp-for="Save" type="checkbox">
-                        <label class="form-check-label" asp-for="Save">
-                            Save payment data
-                        </label>
+        
+    @if(user is not null && user.PaymentId is not null){
+        <div class="row mt-5 p-2">
+            <div class="col-12 d-grid d-block">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#paymentModal">Use saved payment method</button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="paymentModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5">Payment</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to pay with previous payment method ?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form asp-action="SavedPayment">
+                                    <input name="cartId" type="hidden" value="@ViewBag.CartId" />
+                                    <input name="shippingId" type="hidden" value="@ViewBag.shippingId" />
+                                    <input name="userId" type="hidden" value="@user.Id" />
+                                    <input type="submit" id="checkout-samePayment" class="btn btn-success" value="Yes im sure!">
+                                </form>  
+                            </div>
+                        </div>
                     </div>
                 </div>
-            }
-    </div>
-    <div class="row p-2 mb-3">
-        <div class="col-6 d-grid d-block">
-            <a asp-action="Shipping" asp-controller="Checkout" class="btn btn-secondary">Back</a>
+            </div>
         </div>
-        <div class="col-6 d-grid d-block">
-            <input type="submit" class="btn btn-success" value="Next"></input>
+    }
+
+    <form asp-action="Payment">
+        <input name="cartId" type="hidden" value="@ViewBag.CartId" />
+        <input name="shippingId" type="hidden" value="@ViewBag.shippingId" />
+        <div class="row mt-2 mb-3 p-2">
+                @if (user is null)
+                {
+                    <div class="col-12 mb-2">
+                        <label asp-for="Email" class="form-label">Email:</label>
+                        <input asp-for="Email" class="form-control" placeholder="example@gmail.com"/>
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 col-12 mb-2">
+                        <label asp-for="FirstName" class="form-label">First Name:</label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 col-12 mb-2">
+                        <label asp-for="LastName" class="form-label">Last Name:</label>
+                        <input asp-for="LastName" class="form-control"/>
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+                }
+                else
+                {
+                    <input asp-for="Email" type="hidden" value="@user.Email"/>
+                    <input asp-for="FirstName" type="hidden" value="@user.FirstName" />
+                    <input asp-for="LastName" type="hidden" value="@user.LastName" />
+                }
+                <div class="col-12 mb-2">
+                    <label asp-for="CreditCardNumber" class="form-label">Credit Card Number:</label>
+                    <input asp-for="CreditCardNumber" class="form-control" placeholder="XXXX-XXXX-XXXX-XXXX"/>
+                    <span asp-validation-for="CreditCardNumber" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 col-6 mb-2">
+                    <label asp-for="MonthExp" class="form-label">Expires Month:</label>
+                    <input asp-for="MonthExp" class="form-control" />
+                    <span asp-validation-for="MonthExp" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 col-6 mb-2">
+                    <label asp-for="YearExp" class="form-label">Expires Year:</label>
+                    <input asp-for="YearExp" class="form-control" />
+                    <span asp-validation-for="YearExp" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 col-6 mb-2">
+                    <label asp-for="Cvv" class="form-label">CVV:</label>
+                    <input asp-for="Cvv" class="form-control" />
+                    <span asp-validation-for="Cvv" class="text-danger"></span>
+                </div>
+                @if (user is not null)
+                {
+                    <div class="col-12 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="Save" type="checkbox">
+                            <label class="form-check-label" asp-for="Save">
+                                Save payment data
+                            </label>
+                        </div>
+                    </div>
+                }
         </div>
-    </div>
+        <div class="row p-2 mb-3">
+            <div class="col-6 d-grid d-block">
+                <a asp-action="Shipping" id="checkout-back"  asp-controller="Checkout" asp-route-cartId="@ViewBag.CartId" asp-route-shippingId="@ViewBag.ShippingId" class="btn btn-secondary">Back</a>
+            </div>
+            <div class="col-6 d-grid d-block">
+                <input type="submit" id="checkout-next" class="btn btn-success" value="Next"></input>
+            </div>
+        </div>
     </form>
 </div>
 

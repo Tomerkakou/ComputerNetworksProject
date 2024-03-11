@@ -12,6 +12,19 @@ namespace ComputerNetworksProject.Data
         [Key]
         public int Id { get; set; }
 
+        [Required(ErrorMessage = "First name required")]
+        [Display(Name = "First name")]
+        public string FirstName { get; set; }
+
+        [Required(ErrorMessage = "Last name required")]
+        [Display(Name = "Last name")]
+        public string LastName { get; set; }
+
+        [Required(ErrorMessage = "Email required")]
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
         [Required(ErrorMessage = "Credit card is required")]
         [NotMapped]
         [StringLength(16, ErrorMessage = "Use valid Credit card")]
@@ -39,6 +52,18 @@ namespace ComputerNetworksProject.Data
         public Payment()
         {
             DateOfPay = DateTime.Now;
+        }
+
+        public Payment(Payment other)
+        {
+            FirstName = other.FirstName;
+            LastName = other.LastName;
+            Email= other.Email;
+            DateOfPay = DateTime.Now;
+            YearExp= other.YearExp;
+            MonthExp= other.MonthExp;
+            Cvv= other.Cvv;
+            CreditCardNumberEncrypt = other.CreditCardNumberEncrypt;
         }
     }
 }

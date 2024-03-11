@@ -77,7 +77,7 @@
             <button class="btn btn-secondary" disabled>Back</button>
         </div>
         <div class="col-6 d-grid d-block">
-            <a asp-controller="Checkout" asp-action="Shipping"  class="btn btn-success">Next</a>
+            <a asp-controller="Checkout" asp-action="Shipping" asp-route-cartId="@Model.Id" asp-route-shippingId="@ViewBag.ShippingId" class="btn btn-success">Next</a>
         </div>
     </div>
 </div>

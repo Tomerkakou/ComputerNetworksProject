@@ -17,6 +17,8 @@ namespace ComputerNetworksProject.Data
         public Status CartStatus { get; set; }
         [Key]
         public int Id { get; set; }
+
+        public bool BuyNow { get; set; }
         public string? UserId { get; set; }
         [ForeignKey("UserId")]
         public User? User { get; set; }

@@ -205,6 +205,12 @@ namespace ComputerNetworksProject.Controllers
                     //send email notifications
                 }
                 await _hub.Clients.All.SendAsync("productNewAvailableStock", product.Id, product.AvailableStock);
+                var cartIds=await _db.CartItems.Include(ci=>ci.Cart).Where(ci=>ci.ProductId==product.Id && ci.Cart.CartStatus==Cart.Status.ACTIVE).Select(ci=>ci.CartId).ToListAsync();
+                if (cartIds.Any())
+                {
+                    // this product is in some active cart and may be during checkout
+                    await _hub.Clients.All.SendAsync("productPriceChanged", cartIds);
+                }
                 TempData["success"] = $"{name} updated successfully!";
                 return RedirectToAction(nameof(Show), new { id = id });
             }

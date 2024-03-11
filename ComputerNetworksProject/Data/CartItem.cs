@@ -23,8 +23,10 @@ namespace ComputerNetworksProject.Data
         [ForeignKey("CartId")]
         [Required]
         public int CartId { get; set; }
+        public Cart Cart { get; set; }
 
         public CartItem() { }
+
 
         public float GetPrice()
         {

@@ -82,7 +82,7 @@
                     <span class="spinner-border spinner-border-sm d-none"></span>
                     <span role="status" class="d-none">Loading...</span>
                 </button>
-                <button class="btn btn-primary">Buy now</button>
+                <a asp-action="BuyNow" asp-controller="Cart" asp-route-productId="@Model.Id"  class="btn btn-primary">Buy now</a>
             }
             else
             {

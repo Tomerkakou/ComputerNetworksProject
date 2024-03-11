@@ -26,7 +26,7 @@
             </div>
         </div>
         <div class="container-fluid border-top border-2 p-2">
-            <a asp-action="Review" asp-controller="Checkout" class="btn btn-primary col-12 mb-2" type="button">Check out<i class="bi bi-credit-card ms-2"></i></a>
+            <a asp-action="Review" asp-controller="Checkout" asp-route-cartId="@Model.Id" class="btn btn-primary col-12 mb-2" type="button">Check out<i class="bi bi-credit-card ms-2"></i></a>
             <button class="btn btn-danger col-12" data-bs-target="#confirmModal-clearCart" data-bs-toggle="modal" type="button">Clear cart<i class="bi bi-trash3 ms-2"></i></button>
         </div>
         <script>

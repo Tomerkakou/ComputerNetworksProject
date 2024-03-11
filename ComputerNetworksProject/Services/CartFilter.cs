@@ -36,12 +36,12 @@ namespace ComputerNetworksProject.Services
                 user = await _userManager.GetUserAsync(userClaim);
                 if (user is not null)
                 {
-                    userCart = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstOrDefaultAsync(c => c.UserId == user.Id && c.CartStatus == Cart.Status.ACTIVE);
+                    userCart = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstOrDefaultAsync(c => c.UserId == user.Id && c.CartStatus == Cart.Status.ACTIVE && !c.BuyNow);
                 }
             }
             if (int.TryParse(context.HttpContext.Request.Cookies["cart_id"], out cookieCartId))
             {
-                var cookieCart = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstOrDefaultAsync(c => c.Id == cookieCartId && c.CartStatus == Cart.Status.ACTIVE);
+                var cookieCart = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstOrDefaultAsync(c => c.Id == cookieCartId && c.CartStatus == Cart.Status.ACTIVE && !c.BuyNow);
                 if(cookieCart is null)
                 {
                     context.HttpContext.Response.Cookies.Delete("cart_id");
@@ -119,12 +119,6 @@ namespace ComputerNetworksProject.Services
                     }
                 }
             }
-            if(controller is not CheckoutController)
-            {
-                controller.TempData.Remove("checkout-cart2");
-                controller.TempData.Remove("checkout-shipping2");
-                controller.TempData.Remove("checkout-payment2");
-            }
 
             controller.ViewData["Cart"] = finalCart;
 
@@ -150,12 +144,12 @@ namespace ComputerNetworksProject.Services
                 user = await _userManager.GetUserAsync(userClaim);
                 if (user is not null)
                 {
-                    userCart = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstOrDefaultAsync(c => c.UserId == user.Id && c.CartStatus == Cart.Status.ACTIVE);
+                    userCart = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstOrDefaultAsync(c => c.UserId == user.Id && c.CartStatus == Cart.Status.ACTIVE && !c.BuyNow);
                 }
             }
             if (int.TryParse(context.HttpContext.Request.Cookies["cart_id"], out cookieCartId))
             {
-                var cookieCart = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstOrDefaultAsync(c => c.Id == cookieCartId && c.CartStatus == Cart.Status.ACTIVE);
+                var cookieCart = await _db.Carts.Include(c => c.CartItems).ThenInclude(c => c.Product).FirstOrDefaultAsync(c => c.Id == cookieCartId && c.CartStatus == Cart.Status.ACTIVE && !c.BuyNow);
                 if (cookieCart is null)
                 {
                     context.HttpContext.Response.Cookies.Delete("cart_id");

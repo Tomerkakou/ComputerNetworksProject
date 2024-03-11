@@ -1,6 +1,7 @@
 ﻿using ComputerNetworksProject.Data;
 using ComputerNetworksProject.Hubs;
 using ComputerNetworksProject.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -24,122 +25,126 @@ namespace ComputerNetworksProject.Controllers
             _userManager = userManager;
             _aes = aes;
         }
-        public async Task<IActionResult> Review(int? cartId)
+        public async Task<IActionResult> Review(int cartId,int? shippingId)
         {
-            Cart? cart;
-            if(cartId is null)
-            {
-                cart = (Cart?)ViewData["Cart"];
-            }
-            else
-            {
-                cart = await _db.Carts.Include(c => c.CartItems).ThenInclude(ci => ci.Product).FirstOrDefaultAsync(c => c.Id == cartId && c.CartStatus == Cart.Status.ACTIVE);
-            }
+            var cart = await _db.Carts.Include(c => c.CartItems).ThenInclude(ci => ci.Product).FirstOrDefaultAsync(c => c.Id == cartId && c.CartStatus == Cart.Status.ACTIVE);
+            
             if(cart is null)
             {
-                return NotFound();
+                return BadRequest("cardId is not valid");
             }
-            TempData["checkout-cart2"] = cart.Id;
-            TempData.Keep();
+            ViewBag.ShippingId = shippingId;
             return View(cart);
         }
 
-        public async Task<IActionResult> Shipping()
+        public async Task<IActionResult> Shipping(int cartId, int? shippingId)
         {
-            if (!TempData.ContainsKey("checkout-cart2"))
+            var cart = await _db.Carts.FirstOrDefaultAsync(c => c.Id == cartId && c.CartStatus == Cart.Status.ACTIVE);
+            if (cart is null)
             {
-                return BadRequest();    
+                return BadRequest("cardId is not valid");
             }
-            Shipping shipping = new Shipping();
-            if (!TempData.ContainsKey("checkout-shipping2"))
+            Shipping? shipping=null;
+            if (shippingId is not null)
             {
-                if (_signInManager.IsSignedIn(User))
+                shipping = await _db.Shippings.FindAsync(shippingId);
+            }
+            else if(_signInManager.IsSignedIn(User))
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user is not null && user.ShippingId is not null)
                 {
-                    var user = await _userManager.GetUserAsync(User);
-                    if (user is not null && user.ShippingId is not null)
-                    {
-                        shipping = await _db.Shippings.FindAsync(user.ShippingId);
-                    }
+                    shipping = await _db.Shippings.FindAsync(user.ShippingId);
                 }
             }
-            else
-            {
-                shipping = JsonConvert.DeserializeObject<Shipping>((string)TempData["checkout-shipping2"]);
-            }
-            TempData.Keep();
-            return View(shipping);
+            ViewBag.CartId = cartId;
+            return View(shipping  ?? new Shipping());
         }
 
         [HttpPost]
-        public async Task<IActionResult> Shipping(Shipping model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Shipping(int cartId,Shipping model)
         {
-            if (!TempData.ContainsKey("checkout-cart2"))
+            var cart = await _db.Carts.FirstOrDefaultAsync(c => c.Id == cartId && c.CartStatus == Cart.Status.ACTIVE);
+            if (cart is null)
             {
-                return BadRequest();
+                return BadRequest("cardId is not valid");
             }
             if (ModelState.IsValid)
             {
-                
-                TempData["checkout-shipping2"] = JsonConvert.SerializeObject(model);
-                return RedirectToAction("Payment");
-            }
-            TempData.Keep();
-            return View(model);
-        }
-        public async Task<IActionResult> Payment(bool? useSavedPayment)
-        {
-            if (!TempData.ContainsKey("checkout-cart2") ||!TempData.ContainsKey("checkout-shipping2"))
-            {
-                return BadRequest();
-            }
-            Payment payment = new Payment();
-            if (!TempData.ContainsKey("checkout-payment2")  && useSavedPayment is not null && (bool)useSavedPayment)
-            {
-                if (_signInManager.IsSignedIn(User))
-                {
+                await _db.Shippings.AddAsync(model);
+                if (model.Save && _signInManager.IsSignedIn(User)) {
                     var user = await _userManager.GetUserAsync(User);
-                    if (user is not null && user.ShippingId is not null)
+                    if (user is not null)
                     {
-                        var temp = await _db.Payments.FindAsync(user.SavedPayment);
-                        if(temp is not null)
-                        {
-                            payment.Cvv = temp.Cvv;
-                            payment.YearExp = temp.YearExp;
-                            payment.MonthExp = temp.MonthExp;
-                            payment.CreditCardNumberEncrypt = temp.CreditCardNumberEncrypt;
-                        }           
+                        user.SavedShipping = model;
                     }
                 }
+                await _db.SaveChangesAsync();
+                return RedirectToAction("Payment",new { cartId, shippingId = model.Id });
             }
-            if(payment.CreditCardNumberEncrypt is not null)
+            ViewBag.CartId = cartId;
+            return View(model);
+        }
+        public async Task<IActionResult> Payment(int cartId,int shippingId)
+        {
+            var cart = await _db.Carts.FirstOrDefaultAsync(c => c.Id == cartId && c.CartStatus == Cart.Status.ACTIVE);
+            var shipping = await _db.Shippings.FindAsync(shippingId);
+            if (cart is null || shipping is null)
             {
-                payment.CreditCardNumber=_aes.Decrypt(payment.CreditCardNumberEncrypt);
+                return BadRequest("cardId is not valid or shippingId is not valid");
             }
-            TempData.Keep();
+            User? user = null;
+            if (_signInManager.IsSignedIn(User))
+            {
+                user = await _userManager.GetUserAsync(User);
+                if (cart.UserId is not null && cart.UserId != user.Id)
+                {
+                    TempData["error"] = $"Cart id {cart.Id} does not belong to that user!";
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            else if (cart.UserId is not null)
+            {
+                TempData["error"] = $"Cart id {cart.Id} belong to another user!";
+                return RedirectToAction("Index", "Home");
+            }
+            Payment? payment = new Payment();
+            ViewBag.CartId = cartId;    
+            ViewBag.ShippingId = shippingId;    
             return View(payment);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Payment(Payment payment)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Payment(int cartId,Payment payment, int shippingId)
         {
-            if (!TempData.ContainsKey("checkout-cart2") || !TempData.ContainsKey("checkout-shipping2"))
+            var cart = await _db.Carts.Include(c => c.CartItems).ThenInclude(ci => ci.Product).FirstOrDefaultAsync(c => c.Id == cartId && c.CartStatus == Cart.Status.ACTIVE);
+            var shipping = await _db.Shippings.FindAsync(shippingId);
+            if (cart is null || shipping is null)
             {
-                return BadRequest();
+                return BadRequest("cardId is not valid or shippingId is not valid");
+            }
+            User? user = null;
+            if (_signInManager.IsSignedIn(User))
+            {
+                user = await _userManager.GetUserAsync(User);
+                if (cart.UserId is not null && cart.UserId != user.Id)
+                {
+                    TempData["error"] = $"Cart id {cart.Id} does not belong to that user!";
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            else if (cart.UserId is not null)
+            {
+                TempData["error"] = $"Cart id {cart.Id} belong to another user!";
+                return RedirectToAction("Index", "Home");
             }
             if (ModelState.IsValid)
             {
-                payment.CreditCardNumberEncrypt= _aes.Encrypt(payment.CreditCardNumber);
-
-                int cartId = (int)TempData["checkout-cart2"];
-                var cart= await _db.Carts.Include(c => c.CartItems).ThenInclude(ci => ci.Product).FirstOrDefaultAsync(c => c.Id == cartId && c.CartStatus == Cart.Status.ACTIVE);
-                if(cart is null)
-                {
-                    return Forbid("Cart unavailable");
-                }
                 cart.CompleteCart();
-                var shipping = JsonConvert.DeserializeObject<Shipping>((string)TempData["checkout-shipping2"]);
+                payment.CreditCardNumberEncrypt= _aes.Encrypt(payment.CreditCardNumber);
                 await _db.Payments.AddAsync(payment);
-                await _db.Shippings.AddAsync(shipping);
                 var order = new Order
                 {
                     Cart = cart,
@@ -147,40 +152,77 @@ namespace ComputerNetworksProject.Controllers
                     Payment = payment,
                 };
 
-                if (_signInManager.IsSignedIn(User))
+                if (user is not null)
                 {
-                    var user = await _userManager.GetUserAsync(User);
-                    if (user is not null)
+                    order.UserId= user.Id;
+                    if (payment.Save)
                     {
-                        order.UserId= user.Id;
-                        if (shipping.Save)
-                        {
-                            user.SavedShipping = shipping;
-                        }
-                        if (payment.Save)
-                        {
-                            user.SavedPayment = payment;
-                        }
+                        user.SavedPayment = payment;
                     }
                 }
                 await _db.Orders.AddAsync(order);
                 await _db.SaveChangesAsync();
+
                 await _hub.Clients.All.SendAsync("clearCart", cart.Id);
-                TempData["checkout-order2"] = order.Id;
+
                 HttpContext.Response.Cookies.Delete("cart_id");
-                return RedirectToAction("Completed");
+                return RedirectToAction("Completed",new {orderId=order.Id});
             }
-            TempData.Keep();
+            ViewBag.CartId = cartId;
+            ViewBag.ShippingId = shippingId;
             return View(payment);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "User,Admin")]
+        public async Task<IActionResult> SavedPayment(int cartId, int shippingId,string userId)
+        {
+            var cart = await _db.Carts.Include(c => c.CartItems).ThenInclude(ci => ci.Product).FirstOrDefaultAsync(c => c.Id == cartId && c.CartStatus == Cart.Status.ACTIVE);
+            var shipping = await _db.Shippings.FindAsync(shippingId);
+            if (cart is null || shipping is null)
+            {
+                return BadRequest("cardId is not valid or shippingId is not valid");
+            }
+            if (!_signInManager.IsSignedIn(User))
+            {
+                return Unauthorized("user is not loggedin");
+            }
+            var user = await _userManager.GetUserAsync(User);
+            if (user.Id != userId)
+            {
+                return Unauthorized("userId is not matching");
+            }
+            if (cart.UserId is null || cart.UserId != user.Id)
+            {
+                TempData["error"] = $"Cart id {cart.Id} does not belong to that user!";
+                return RedirectToAction("Index", "Home");
+            }
+            if (user is null || user.PaymentId is null)
+            {
+                return BadRequest("No saved payment for user!");
+            }
+            var temp = await _db.Payments.FindAsync(user.PaymentId);
+            var payment = new Payment(temp);
+            cart.CompleteCart();
+            await _db.Payments.AddAsync(payment);
+            var order = new Order
+            {
+                Cart = cart,
+                Shipping = shipping,
+                Payment = payment,
+            };
+            order.UserId = user.Id;
+            await _db.Orders.AddAsync(order);
+            await _db.SaveChangesAsync();
+
+            await _hub.Clients.All.SendAsync("clearCart", cart.Id);
+
+            HttpContext.Response.Cookies.Delete("cart_id");
+            return RedirectToAction("Completed", new { orderId = order.Id });
+        }
         public async Task<IActionResult> Completed(int orderId)
         {
-            if (!TempData.ContainsKey("checkout-order2"))
-            {
-                return BadRequest();
-            }
-            var orderId= (int)TempData["checkout-order2"];
             var order= await _db.Orders.Include(o=>o.Cart).ThenInclude(c=>c.CartItems).ThenInclude(ci=>ci.Product).FirstAsync(o=>o.Id==orderId);
             return View(order);
         }
