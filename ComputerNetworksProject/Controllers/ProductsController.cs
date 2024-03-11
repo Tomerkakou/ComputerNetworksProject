@@ -219,7 +219,7 @@ namespace ComputerNetworksProject.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id,bool? manage)
         {
             if (_db.Products == null)
             {
@@ -232,6 +232,10 @@ namespace ComputerNetworksProject.Controllers
             }
             
             await _db.SaveChangesAsync();
+            if(manage is not null && (bool)manage)
+            {
+                return RedirectToAction("Manage", "Products");
+            }
             return RedirectToAction("Index","Home");
         }
 
@@ -314,6 +318,31 @@ namespace ComputerNetworksProject.Controllers
                 return Content("You signed to notification successfully!");
             }
             return BadRequest("Invalid email address or productId");
+        }
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Manage()
+        {
+            var products = await _db.Products.ToListAsync();
+            ViewBag.ProductsActiveCount = products.Where(p => p.ProductStatus == Product.Status.ACTIVE).ToList().Count;
+            ViewBag.ProductsDeletedCount = products.Where(p => p.ProductStatus == Product.Status.DELETED).ToList().Count;
+            return View(products);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Activate(int id)
+        {
+            if (_db.Products == null)
+            {
+                return Problem("Entity set 'ApplicationDbContext.Products'  is null.");
+            }
+            var product = await _db.Products.FindAsync(id);
+            if (product != null)
+            {
+                product.ProductStatus = Product.Status.ACTIVE;
+            }
+
+            await _db.SaveChangesAsync();
+            return RedirectToAction("Manage");
         }
 
 

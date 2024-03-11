@@ -1,0 +1,104 @@
+﻿@using ComputerNetworksProject.Data;
+@model ICollection<Product>
+@{
+    ViewData["Title"] = "Manage";
+    ViewData["Products"] = "active";
+}
+
+<div class="px-3">
+    <div class="px-5 d-flex justify-content-around fw-bold">
+        <span>Total products: @Model.Count</span>
+        <span>Total active products: @ViewBag.ProductsActiveCount</span>
+        <span>Total deleted products: @ViewBag.ProductsDeletedCount</span>
+    </div>
+    <div class="px-5"><hr /></div>
+    <div class="row px-5">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle  text-center">
+                <thead class="table-primary">
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Stock</th>
+                        <th scope="col">Rate</th>
+                        <th scope="col">Release</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="fw-semibold">
+                    @foreach(var product in Model)
+                    {
+                        <tr id="productTr-@product.Id">
+                            <td>@product.Name</td>
+                            <td>@product.ProductStatus.ToString()</td>
+                            <td>
+                                @if (product?.PriceDiscount is not null)
+                                {
+                                    <span class="ms-auto">
+                                        <span class="fw-light fs-6 text-decoration-line-through">
+                                            @product?.Price
+                                        </span>
+                                        <span class="ms-2 fs-5 fw-normal text-danger">
+                                            @product?.PriceDiscount$
+                                        </span>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="ms-2 fs-5 fw-normal">
+                                        @product?.Price$
+                                    </span>
+                                }
+                            </td>
+                            <td>@product.AvailableStock</td>
+                            <td>@product.Rate</td>
+                            <td>@product.Created.ToString("dd/MM/yyyy H:mm")</td>
+                            <td>
+                                @if (product.ProductStatus == Product.Status.ACTIVE)
+                                {
+                                    <a asp-controller="Products" asp-action="Show" asp-route-id="@product.Id" type="button" class="btn btn-primary btn-sm">Show</a>
+                                    <a asp-controller="Products" asp-action="Edit" asp-route-id="@product.Id" type="button" class="btn btn-primary btn-sm">Edit</a>
+                                    <a onclick="deleteProduct(@product.Id,'@product.Name')" data-bs-toggle="modal" data-bs-target="#confirmModal" type="button" class="btn btn-danger btn-sm">Delete</a>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Products" asp-action="Activate" asp-route-id="@product.Id" type="button" class="btn btn-primary btn-sm">Activate</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="confirmModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Are you sure?</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a type="button" id="modallink" href="" class="btn btn-primary">Understood</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function deleteProduct(productId,productName) {
+        console.log(productId)
+        var link = document.getElementById("modallink");
+        var body = document.getElementById("modal-body");
+        body.innerText = `Deleting ${productName} will remove him from all customers carts!`
+        link.href = `/Products/Delete/${productId}?manage=true`;
+    }
+</script>

@@ -1,0 +1,38 @@
+﻿@model ComputerNetworksProject.Data.User
+@{
+    ViewData["Title"] = "Orders";
+    ViewData["Orders"] = "active";
+}
+<section>
+    <div class="px-5 d-flex justify-content-around fw-bold">
+        <span>Total orders: @ViewBag.TotalOrdersCount</span>
+        <span>Total orders price: @ViewBag.TotalOrderPrice$</span>
+        
+    </div>
+    <div class="px-5"><hr /></div>
+    
+    <div class="px-5 mt-4 mb-3">
+        <div class="accordion accordion-flush" id="orders-accordion">
+            @foreach (var order in Model.Orders)
+            {
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#order-@order.Id">
+                            <i class="bi bi-card-list me-2"></i>
+                            @($"Order {order.Id}      total items: {order.Cart.GetItemsCount()}      total price: {order.Cart.GetTotalPrice()}$")
+                        </button>
+                    </h2>
+                    <div id="order-@order.Id" class="accordion-collapse collapse" data-bs-parent="#orders-accordion">
+                        <div class="accordion-body fw-bolder">
+                            <div>Address: @order.Shipping.Address</div>
+                            <div>City: @order.Shipping.City</div>
+                            <div>Payment method: XXXX-XXXX-XXXX-@order.Payment.CreditCardNumber?.Substring(order.Payment.CreditCardNumber.Length - 4)</div>
+                            <div>Date of order: @order.Payment.DateOfPay.ToString("dd/MM/yyyy H:mm")</div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</section>
