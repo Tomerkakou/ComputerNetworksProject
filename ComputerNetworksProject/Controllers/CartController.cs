@@ -73,7 +73,7 @@ namespace ComputerNetworksProject.Controllers
                         //reset cart expire
                         var cookieOptions = new CookieOptions
                         {
-                            Expires = Constant.CookieOffset,
+                            Expires = DateTime.Now.AddMinutes(Constant.CookieOffset),
                         };
                         HttpContext.Response.Cookies.Append("cart_id", cart.Id.ToString(), cookieOptions);
                     }
@@ -116,7 +116,7 @@ namespace ComputerNetworksProject.Controllers
                     //reset cart expire
                     var cookieOptions = new CookieOptions
                     {
-                        Expires = Constant.CookieOffset,
+                        Expires = DateTime.Now.AddMinutes(Constant.CookieOffset),
                     };
                     HttpContext.Response.Cookies.Append("cart_id", cart.Id.ToString(), cookieOptions);
                 }
@@ -160,7 +160,7 @@ namespace ComputerNetworksProject.Controllers
                     //reset cart expire
                     var cookieOptions = new CookieOptions
                     {
-                        Expires = Constant.CookieOffset,
+                        Expires = DateTime.Now.AddMinutes(Constant.CookieOffset),
                     };
                     HttpContext.Response.Cookies.Append("cart_id", cart.Id.ToString(), cookieOptions);
                 }

@@ -51,7 +51,7 @@ namespace ComputerNetworksProject.Services
                     //no user and cart not belong to any user
                     var cookieOptions = new CookieOptions
                     {
-                        Expires = Constant.CookieOffset,
+                        Expires = DateTime.Now.AddMinutes(Constant.CookieOffset),
                     };
                     context.HttpContext.Response.Cookies.Append("cart_id", cookieCartId.ToString(), cookieOptions);
                     finalCart = cookieCart;
@@ -159,7 +159,7 @@ namespace ComputerNetworksProject.Services
                     //no user and cart not belong to any user
                     var cookieOptions = new CookieOptions
                     {
-                        Expires = Constant.CookieOffset,
+                        Expires = DateTime.Now.AddMinutes(Constant.CookieOffset),
                     };
                     context.HttpContext.Response.Cookies.Append("cart_id", cookieCartId.ToString(), cookieOptions);
                     finalCart = cookieCart;
