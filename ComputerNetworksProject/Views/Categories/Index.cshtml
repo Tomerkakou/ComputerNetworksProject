@@ -13,9 +13,9 @@
             <div class="col-md-8 col-12 d-flex justify-content-center align-content-center h-100 p-3 fw-bold">
                 <ul class="list-group w-100">
                     <li class="list-group-item d-flex">
-                            @Model.Categories.FirstOrDefault().Name
+                            @Model.Categories.Where(c=>c.Name=="Default").FirstOrDefault().Name
                     </li>
-                    @foreach (var category in Model.Categories.Skip(1))
+                    @foreach (var category in Model.Categories.Where(c => c.Name != "Default"))
                     {
                         <li class="list-group-item d-flex">
                             @category.Name

@@ -38,8 +38,13 @@ namespace ComputerNetworksProject.Controllers
             //{
             //    ModelState.AddModelError("Input.Name", "Category name must be unique!");
             //}
+            if (_db.Categories.Where(c => c.Name.ToLower() == data.Input.Name.ToLower()).Any())
+            {
+                ModelState.AddModelError("Input.Name", $"Category {data.Input.Name} already exists!");
+            }
             if (ModelState.IsValid)
             {
+
                 try
                 {
                     _db.Add(data.Input);
@@ -51,7 +56,7 @@ namespace ComputerNetworksProject.Controllers
                         Input = new Category(),
                     };
                     TempData["info"] = $"{data.Input.Name} added successfully!";
-                    return View(model);
+                    return RedirectToAction("Index");
                 }
                 catch(DbUpdateException ex) 
                 {

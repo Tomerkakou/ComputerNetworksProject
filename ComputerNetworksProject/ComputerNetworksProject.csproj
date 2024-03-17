@@ -12,6 +12,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="webscraping.py" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="webscraping.py" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="wwwroot\js\Home\Index.js" />
   </ItemGroup>
 

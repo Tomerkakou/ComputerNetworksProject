@@ -16,6 +16,7 @@ namespace ComputerNetworksProject.Models
         public List<Product>? FilterdProducts { get; set; }
         public List<int>? ShowPages { get; set; }
         public int ActivePage { get; set; }
+        public int TotalPages { get; set; }
         public Filter? FilterInput { get; set; }
 
         public bool? ShowTable { get; set; }
@@ -72,7 +73,7 @@ namespace ComputerNetworksProject.Models
                 count++;
             }
             ActivePage= page;
-
+            TotalPages=totalPages;
         }
         public void ApplyFilters()
         {

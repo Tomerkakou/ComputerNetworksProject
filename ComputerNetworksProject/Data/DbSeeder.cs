@@ -31,6 +31,22 @@ namespace ComputerNetworksProject.Data
                 await userManager.AddToRoleAsync(user, Roles.Admin.ToString());
             }
 
+            user = new User
+            {
+                UserName = "user@gmail.com",
+                Email = "user@gmail.com",
+                FirstName = "Tal",
+                LastName = "Bo ahron",
+                EmailConfirmed = true,
+                PhoneNumberConfirmed = true
+            };
+            userInDb = await userManager.FindByEmailAsync(user.Email);
+            if (userInDb == null)
+            {
+                await userManager.CreateAsync(user, "User@123");
+                await userManager.AddToRoleAsync(user, Roles.User.ToString());
+            }
+
             var _db = service.GetService<ApplicationDbContext>();
             var category = new Category
             {
