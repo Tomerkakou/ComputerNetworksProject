@@ -48,7 +48,13 @@
                 <span class="ms-2" style="font-size: 1.5rem; color: #ffcc00;"><i class="bi bi-star-fill"></i></span>
             </div>
 
-            @if (Model.AvailableStock <= 3)
+            @if (Model.AvailableStock == 0)
+            {
+                <div class="text-danger">
+                    Out of stock!
+                </div>
+            }
+            else if (Model.AvailableStock <= 3)
             {
                 <div class="text-danger">
                     Only @Model.AvailableStock left!

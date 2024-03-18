@@ -59,6 +59,10 @@ namespace ComputerNetworksProject.Data
             {
                 return (float)_rate;
             }
+            if (!Rates.Any())
+            {
+                return 0;
+            }
             try
             {
                 double averageStars = Rates.Average(rate => rate.Stars);

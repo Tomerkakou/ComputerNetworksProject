@@ -322,7 +322,7 @@ namespace ComputerNetworksProject.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Manage()
         {
-            var products = await _db.Products.ToListAsync();
+            var products = await _db.Products.Include(p=>p.Rates).Include(p=>p.Category).ToListAsync();
             ViewBag.ProductsActiveCount = products.Where(p => p.ProductStatus == Product.Status.ACTIVE).ToList().Count;
             ViewBag.ProductsDeletedCount = products.Where(p => p.ProductStatus == Product.Status.DELETED).ToList().Count;
             return View(products);
