@@ -128,7 +128,7 @@
         @if(Model.ShowTable is not null && (bool)Model.ShowTable)
         {
             <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle  text-center">
+                <table class="table table-striped table-hover align-middle  text-center" id="dataTable">
                     <thead class="table-primary">
                         <tr>
                             <th scope="col">#</th>
@@ -145,7 +145,7 @@
                         @for(int i=0;i<Model.ProductsInPage.Count;i++)
                         {
                                 var product = Model.ProductsInPage[i];
-                            <tr id="productTr-@product.Id">
+                            <tr id="productTr-@product.Id" >
                                 <th scope="row">@(i+1)</th>
                                 <partial name="_ProductTableRowPartial" model="@product" />
                             </tr>
