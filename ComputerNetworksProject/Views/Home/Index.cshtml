@@ -102,6 +102,13 @@
                 </button>
                 <ul class="dropdown-menu">
                     <li>
+                        <a asp-controller="Home" asp-action="Index" asp-route-sort="no_sort" class="dropdown-item d-flex align-items-center active" id="no-sort">
+                            <i class="bi bi-list me-1"></i>
+                            No sort
+                            <i class="bi bi-check2 ms-auto"></i>
+                        </a>
+                    </li>
+                    <li>
                         <a asp-controller="Home" asp-action="Index" asp-route-sort="price_asc" class="dropdown-item d-flex align-items-center" id="price_asc">
                             <i class="bi bi-sort-numeric-down me-1"></i>
                             Price
@@ -114,11 +121,15 @@
                     <li><a asp-controller="Home" asp-action="Index" asp-route-sort="cat_asc" class="dropdown-item d-flex align-items-center" id="cat_asc"><i class="bi bi-sort-alpha-down me-1"></i>Category<i class="bi bi-check2 ms-auto d-none"></i></a></li>
                     <li><a asp-controller="Home" asp-action="Index" asp-route-sort="cat_dec" class="dropdown-item d-flex align-items-center" id="cat_dec"><i class="bi bi-sort-alpha-up-alt me-1"></i>Category<i class="bi bi-check2 ms-auto d-none"></i></a></li>
                 </ul>
-                @if (ViewData["sort"] is not null) {
+                @if (Model.Sort is not null) {
                 <script>
-                    const item = document.getElementById("@ViewData["sort"]")
+                    const item = document.getElementById("@Model.Sort")
                     item.classList.add("active")
-                    item.querySelectorAll("i")[1].classList.remove("d-none")   
+                    item.querySelectorAll("i")[1].classList.remove("d-none")
+
+                    const item2 = document.getElementById("no-sort")
+                    item2.classList.remove("active")
+                    item2.querySelectorAll("i")[1].classList.add("d-none")
                 </script>
                 }
             </div>  

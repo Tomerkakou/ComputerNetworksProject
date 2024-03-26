@@ -21,6 +21,8 @@ namespace ComputerNetworksProject.Models
 
         public bool? ShowTable { get; set; }
 
+        public string? Sort { get; set; }
+
         public HomeModel() { 
 
         }
@@ -124,9 +126,13 @@ namespace ComputerNetworksProject.Models
             }
 
         }
-        public void ApplySort(string sort)
+        public void ApplySort()
         {
-            var res = sort.Split('_');
+            if(Sort is null || Sort=="no_sort")
+            {
+                return;
+            }
+            var res = Sort.Split('_');
             string sortBy = res[0];
             string sortOrder = res[1];
 

@@ -104,9 +104,10 @@ namespace ComputerNetworksProject.Services
                 var deletedCartItem=finalCart.CartItems.Where(ci=>ci.Product.ProductStatus==Product.Status.DELETED).ToList();
                 if(deletedCartItem.Count > 0) {
                     string combinedNames = string.Join(", ", deletedCartItem.Select(ci => ci.Product.Name));
-                    controller.TempData["info"] = $"Products : {combinedNames} removed from your cart";
+                    controller.TempData["info"] = $"Products : {combinedNames} removed from your cart (deleted by admin)";
                     foreach(var item in deletedCartItem)
                     {
+                        finalCart.DeleteItem(item.ProductId);
                         _db.CartItems.Remove(item);
                     }
                     await _db.SaveChangesAsync();
@@ -210,6 +211,7 @@ namespace ComputerNetworksProject.Services
             {
                 finalCart.LastUpdate = DateTime.Now;
                 await _db.SaveChangesAsync();
+                /* 
                 var deletedCartItem = finalCart.CartItems.Where(ci => ci.Product.ProductStatus == Product.Status.DELETED).ToList();
                 if (deletedCartItem.Count > 0)
                 {
@@ -228,6 +230,7 @@ namespace ComputerNetworksProject.Services
                         finalCart = null;
                     }
                 }
+                */
             }
 
             pagemodel.ViewData["Cart"] = finalCart;

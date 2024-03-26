@@ -31,7 +31,8 @@ namespace ComputerNetworksProject.Controllers
             
             if(cart is null)
             {
-                return BadRequest("cardId is not valid");
+                TempData["error"] = "Cart have been deleted!";
+                return RedirectToAction("Index", "Home");
             }
             ViewBag.ShippingId = shippingId;
             return View(cart);
@@ -216,7 +217,7 @@ namespace ComputerNetworksProject.Controllers
             await _db.Orders.AddAsync(order);
             await _db.SaveChangesAsync();
 
-            await _hub.Clients.All.SendAsync("clearCart", cart.Id);
+            await _hub.Clients.All.SendAsync("clearCart", cart.Id,false);
 
             HttpContext.Response.Cookies.Delete("cart_id");
             return RedirectToAction("Completed", new { orderId = order.Id });

@@ -23,6 +23,26 @@ function AddErrorNoClose(errorMsg) {
     alertPlaceholder.append(wrapper)
 }
 
+function ChangeInCheckout(cartId) {
+    var currentUrl = window.location.href;
+    if (currentUrl.includes('Checkout') && currentUrl.includes(`cartId=${cartId}`)) {
+        if (currentUrl.includes('Review')) {
+            location.reload()
+            return
+        }
+        $("#checkout-back")?.addClass("disabled")
+        $("#checkout-next")?.prop("disabled", true)
+        $("#checkout-samePayment")?.prop("disabled", true)
+        var reviewUrl = currentUrl.replace("Shipping", "Review").replace("Payment", "Review")
+        const html = `Your Cart have been changed 
+                    <a class="ms-1 icon-link icon-link-hover" href="${reviewUrl}">
+                        Review your cart again
+                        <i class="bi bi-arrow-right"></i>
+                    </a>`
+        AddErrorNoClose(html)
+    }
+}
+
 function ClearCart() {
     $.ajax({
         url: `/Cart/GetCart`,
@@ -38,43 +58,51 @@ function ClearCart() {
     });
 }
 async function increaseArrow(productId) {
-    const res = await fetch(`cart/AddItem?productId=${productId}`)
-    const data = await res.json()
-    const cartItemContainer = $(`#cartItem-container-${data.cartId}`)
-    if (cartItemContainer.length == 0) {
-        $("#offcanvas-close").click()
-        AddError("Old cart has been removed due to long idle")
-        const cartOffCanvas = $("#cartoffcanvas")
-        if (cartOffCanvas.length == 0) {
-            console.log("error no off canvas")
-        }
-        $.ajax({
-            url: `/Cart/GetCart?cartId=${data.cartId}`,
-            type: 'GET',
-            success: function (data) {
-                cartOffCanvas.replaceWith(data)
-                const badge = $("#cartIconCount")
-                badge.text(data.cartCount)
-                badge.removeClass("d-none")
-
-            },
-            error: function () {
-                console.log('Error fetching data');
+    const res = await fetch(`/cart/AddItem?productId=${productId}`)
+    if (res.status === 400) {
+        window.location.reload(true);
+    }
+    else {
+        const data = await res.json()
+        const cartItemContainer = $(`#cartItem-container-${data.cartId}`)
+        if (cartItemContainer.length == 0) {
+            $("#offcanvas-close").click()
+            AddError("Old cart has been removed due to long idle")
+            const cartOffCanvas = $("#cartoffcanvas")
+            if (cartOffCanvas.length == 0) {
+                console.log("error no off canvas")
             }
-        });
+            $.ajax({
+                url: `/Cart/GetCart?cartId=${data.cartId}`,
+                type: 'GET',
+                success: function (data) {
+                    cartOffCanvas.replaceWith(data)
+                    const badge = $("#cartIconCount")
+                    badge.text(data.cartCount)
+                    badge.removeClass("d-none")
+
+                },
+                error: function () {
+                    console.log('Error fetching data');
+                }
+            });
+        }
     }
 }
 
 async function decreaseArrow(productId) {
-    const res = await fetch(`cart/DecreaseItem?productId=${productId}`)
+    const res = await fetch(`/cart/DecreaseItem?productId=${productId}`)
     if (res.status === 403) {
         ClearCart()
         AddError(await res.text())
     }
+    else if (res.status === 400){
+        window.location.reload(true);
+    }
 }
 
 async function deleteItem(productId) {
-    const res = await fetch(`cart/DeleteItem?productId=${productId}`)
+    const res = await fetch(`/cart/DeleteItem?productId=${productId}`)
     if (res.status === 403) {
         ClearCart()
         AddError(await res.text())
@@ -82,7 +110,7 @@ async function deleteItem(productId) {
 }
 
 async function deleteCart() {
-    const res = await fetch(`cart/DeleteCart`)
+    const res = await fetch(`/cart/DeleteCart`)
 }
 
 async function addToCart(btn) {
@@ -98,31 +126,35 @@ async function addToCart(btn) {
     loading.classList.remove("d-none");
 
     const res = await fetch(`cart/AddItem?productId=${productId}`)
-    const data = await res.json()
-
-    const cartItemContainer = $(`#cartItem-container-${data.cartId}`)
-    if (cartItemContainer.length == 0) {
-        const cartOffCanvas = $("#cartoffcanvas")
-        if (cartOffCanvas.length == 0) {
-            console.log("error no off canvas")
-        }
-        $.ajax({
-            url: `/Cart/GetCart?cartId=${data.cartId}`,
-            type: 'GET',
-            success: function (data) {
-                cartOffCanvas.replaceWith(data)
-                const badge = $("#cartIconCount")
-                badge.text(data.cartCount)
-                badge.removeClass("d-none")
-                
-            },
-            error: function () {
-                console.log('Error fetching data');
-            }
-        });
+    if (res.status === 400) {
+        window.location.reload(true);
     }
+    else {
+        const data = await res.json()
 
+        const cartItemContainer = $(`#cartItem-container-${data.cartId}`)
+        if (cartItemContainer.length == 0) {
+            const cartOffCanvas = $("#cartoffcanvas")
+            if (cartOffCanvas.length == 0) {
+                console.log("error no off canvas")
+            }
+            $.ajax({
+                url: `/Cart/GetCart?cartId=${data.cartId}`,
+                type: 'GET',
+                success: function (data) {
+                    cartOffCanvas.replaceWith(data)
+                    const badge = $("#cartIconCount")
+                    badge.text(data.cartCount)
+                    badge.removeClass("d-none")
 
+                },
+                error: function () {
+                    console.log('Error fetching data');
+                }
+            });
+        }
+
+    }
     text.classList.remove("d-none");
     spiner.classList.add("d-none");
     loading.classList.add("d-none")
@@ -178,7 +210,6 @@ productsHub.on("productNewAvailableStock", async (productId, stock) => {
 });
 
 productsHub.on("newCart", async (cartId) => {
-    console.log("test")
     const cartOffCanvas = $("#cartoffcanvas")
     if (cartOffCanvas.length == 0) {
         console.log("error no off canvas")
@@ -234,6 +265,9 @@ productsHub.on("cartChanged", async (productId, cartItemAmount, cartItemPrice, c
         const totalPrice = $("#totalPrice")
         totalPrice.text(`Total price: ${cartPrice}$`)
     }
+
+    ChangeInCheckout(cartId);
+    
 });
 
 
@@ -252,9 +286,11 @@ productsHub.on("cartItemRemove", async (productId, cartId, cartPrice, cartItemCo
         const totalPrice = $("#totalPrice")
         totalPrice.text(`Total price: ${cartPrice}$`)
     }
+
+    ChangeInCheckout(cartId);
 })
 
-productsHub.on("clearCart", async (cartId) => {
+productsHub.on("clearCart", async (cartId,redirect=true) => {
     const cartItemContainer = $(`#cartItem-container-${cartId}`)
     if (cartItemContainer.length > 0) {
         const offcanvas = cartItemContainer.parent().parent()
@@ -271,11 +307,19 @@ productsHub.on("clearCart", async (cartId) => {
             }
         });
     }
+    if (redirect) {
+        var currentUrl = window.location.href;
+        if (currentUrl.includes('Checkout') && currentUrl.includes(`cartId=${cartId}`)) {
+            var homeUrl = "/?msg=Your cart has been deleted while you were in the checkout process."
+            location.href = homeUrl;
+        }
+    }
+    
 })
 
-productsHub.on("productPriceChanged", async (cardIds) => {
+productsHub.on("productPriceChanged", async (cartIds) => {
     var currentUrl = window.location.href;
-    for (const cartId of cardIds) {
+    for (const cartId of cartIds) {
         if (currentUrl.includes('Checkout') && currentUrl.includes(`cartId=${cartId}`)){
             if(currentUrl.includes('Review')) {
                 location.reload()
@@ -284,7 +328,7 @@ productsHub.on("productPriceChanged", async (cardIds) => {
             $("#checkout-back")?.addClass("disabled")
             $("#checkout-next")?.prop("disabled", true)
             $("#checkout-samePayment")?.prop("disabled", true)
-            reviewUrl = currentUrl.replace("Shipping", "Review").replace("Payment", "Review")
+            var reviewUrl = currentUrl.replace("Shipping", "Review").replace("Payment", "Review")
             const html =`Admin changed the price of product in your cart please go back and 
                         <a class="ms-1 icon-link icon-link-hover" href="${reviewUrl}">
                           Review your cart again
@@ -294,6 +338,7 @@ productsHub.on("productPriceChanged", async (cardIds) => {
         }
     }
 })
+
 
 function fullfilled() {
 

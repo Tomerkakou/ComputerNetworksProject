@@ -27,8 +27,12 @@ namespace ComputerNetworksProject.Controllers
             _homeModel = new HomeModel([.. _db.Products.Where(p=>p.ProductStatus!=Product.Status.DELETED).Include(p => p.Rates).Include(p=>p.Category)]);
         }
         [HttpGet]
-        public async Task<IActionResult> Index(int? page,string? sort,bool? table)
+        public async Task<IActionResult> Index(int? page,string? sort,bool? table, string? msg)
         {
+            if (msg is not null)
+            {
+                TempData["warning"] = msg;
+            }
             _homeModel.FilterInput = HttpContext.Session.GetObject<Filter>("Filter");
             if(_homeModel.FilterInput is null)
             {
@@ -40,17 +44,15 @@ namespace ComputerNetworksProject.Controllers
             }
             _homeModel.ShowTable = HttpContext.Session.GetObject<bool?>(nameof(table));
             page ??= 1;
+            if (sort is not null)
             {
+                HttpContext.Session.SetObject(nameof(sort), sort);
             }
+            _homeModel.Sort = HttpContext.Session.GetObject<string?>(nameof(sort));
             try
             {
                 _homeModel.ApplyFilters();
-                if (sort is not null)
-                {
-                    _homeModel.ApplySort((string)sort);
-                    ViewData["sort"] = sort;
-
-                }
+                _homeModel.ApplySort();
                 _homeModel.InitPage((int)page);
 
             }catch(ArgumentException ex) {
@@ -67,6 +69,7 @@ namespace ComputerNetworksProject.Controllers
 
             return View(_homeModel);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(HomeModel homeModel)

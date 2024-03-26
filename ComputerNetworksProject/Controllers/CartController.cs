@@ -32,9 +32,12 @@ namespace ComputerNetworksProject.Controllers
                 return BadRequest("product id is null");
             }
             var product =await _db.Products.FirstOrDefaultAsync(p=>p.Id == productId);
-
             if(product is null) {
                 return BadRequest("not valid product id");
+            }
+            if(product.ProductStatus==Product.Status.DELETED)
+            {
+                return BadRequest();
             }
             Cart? cart = (Cart?)ViewData["Cart"];
             bool newCart = false;
@@ -101,7 +104,15 @@ namespace ComputerNetworksProject.Controllers
                 return BadRequest("No productId");
             }
             var product=await _db.Products.FindAsync(productId);
-            if(cart is null)
+            if (product is null)
+            {
+                return BadRequest("not valid product id");
+            }
+            if (product.ProductStatus == Product.Status.DELETED)
+            {
+                return BadRequest();
+            }
+            if (cart is null)
             {
                 return StatusCode(403,"Cart has been removed due to long idle");
             }
@@ -137,36 +148,47 @@ namespace ComputerNetworksProject.Controllers
             }
             if(cart is null)
             {
-                return StatusCode(403,"Cart has been removed due to long idle");
+                var msg = TempData["info"] is not null ? TempData["info"] : "Cart has been removed due to long idle";
+                return StatusCode(403, msg);
             }
-            var cartItem = cart.DeleteItem((int)productId);
-            var product=cartItem.Product;
-            _db.CartItems.Remove(cartItem);
-            if (cart.GetItemsCount() == 0)
+            try
             {
-                //delete cart
-                _db.Carts.Remove(cart);
-                await _db.SaveChangesAsync();
-                await _hub.Clients.All.SendAsync("clearCart", cart.Id);
-                HttpContext.Response.Cookies.Delete("cart_id");
+                var cartItem = cart.DeleteItem((int)productId);
+                var product = cartItem.Product;
+                _db.CartItems.Remove(cartItem);
+                await _hub.Clients.All.SendAsync("productNewAvailableStock", productId, product.AvailableStock);
             }
-            else
+            catch
             {
-                // only remove one item
-                await _db.SaveChangesAsync();
-                await _hub.Clients.All.SendAsync("cartItemRemove", productId, cart.Id, cart.GetTotalPrice(), cart.GetItemsCount());
-                if (!User.Identity.IsAuthenticated)
+                //not do anything
+            }
+            finally
+            {
+                if (cart.GetItemsCount() == 0)
                 {
-                    //reset cart expire
-                    var cookieOptions = new CookieOptions
-                    {
-                        Expires = DateTime.Now.AddMinutes(Constant.CookieOffset),
-                    };
-                    HttpContext.Response.Cookies.Append("cart_id", cart.Id.ToString(), cookieOptions);
+                    //delete cart
+                    _db.Carts.Remove(cart);
+                    await _db.SaveChangesAsync();
+                    await _hub.Clients.All.SendAsync("clearCart", cart.Id);
+                    HttpContext.Response.Cookies.Delete("cart_id");
                 }
-            }     
-            await _hub.Clients.All.SendAsync("productNewAvailableStock", productId, product.AvailableStock);
-            
+                else
+                {
+                    // only remove one item
+                    await _db.SaveChangesAsync();
+                    await _hub.Clients.All.SendAsync("cartItemRemove", productId, cart.Id, cart.GetTotalPrice(), cart.GetItemsCount());
+                    if (!User.Identity.IsAuthenticated)
+                    {
+                        //reset cart expire
+                        var cookieOptions = new CookieOptions
+                        {
+                            Expires = DateTime.Now.AddMinutes(Constant.CookieOffset),
+                        };
+                        HttpContext.Response.Cookies.Append("cart_id", cart.Id.ToString(), cookieOptions);
+                    }
+                }
+                
+            }
 
             return Ok();    
 

@@ -141,14 +141,3 @@ async function RegisterNotify() {
     });
 }
 
-function animateTableRows() {
-    var rows = document.querySelectorAll('#dataTable tbody tr');
-    rows.forEach(function (row, index) {
-        setTimeout(function () {
-            row.classList.add('animate__animated', 'animate__backInLeft');
-        }, index * 50); 
-    });
-}
-window.addEventListener('load', function () {
-    animateTableRows();
-});
