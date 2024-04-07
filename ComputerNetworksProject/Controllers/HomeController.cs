@@ -38,6 +38,10 @@ namespace ComputerNetworksProject.Controllers
             {
                 _homeModel.FilterInput = new HomeModel.Filter { Rate = 0 };
             }
+            else if(_homeModel.FilterInput.CategoryName is not null && !_db.Categories.Where(c=>c.Name== _homeModel.FilterInput.CategoryName).Any())
+            {
+                _homeModel.FilterInput.CategoryName = null;
+            }
             if(table is not null)
             {
                 HttpContext.Session.SetObject(nameof(table), table);

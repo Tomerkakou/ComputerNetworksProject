@@ -24,8 +24,7 @@ namespace ComputerNetworksProject.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<User> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
-
-        public RegisterModel(
+         public RegisterModel(
             UserManager<User> userManager,
             IUserStore<User> userStore,
             SignInManager<User> signInManager,
@@ -52,6 +51,9 @@ namespace ComputerNetworksProject.Areas.Identity.Pages.Account
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public string ReturnUrl { get; set; }
+
+        public string PasswordTooltip { get => "• at least 6 characters<br/>• one non alphanumeric character<br/>• one digit ('0'-'9')<br/>• one uppercase ('A'-'Z')<br/>• one lowercase ('a'-'z')"; }
+
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used

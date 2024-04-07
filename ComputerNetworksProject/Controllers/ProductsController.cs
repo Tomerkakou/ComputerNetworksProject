@@ -52,7 +52,7 @@ namespace ComputerNetworksProject.Controllers
         [Authorize(Roles ="Admin")]
         public IActionResult Create()
         {
-            ViewData["CategoryName"] = new SelectList(_db.Categories, "Name", "Name");
+            ViewData["CategoryName"] = new SelectList(_db.Categories, "Name", "Name","Default");
             return View();
         }
 

@@ -25,7 +25,7 @@
                                         <span asp-validation-for="Input.Email" class="text-danger pt-1"></span>
                                     </div>
                                     <div class="col-6">
-                                        <div class="input-group mb-2">
+                                        <div class="input-group mb-2" data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="left" data-bs-title="@Model.PasswordTooltip">
                                             <span class="input-group-text"><i class="bi bi-key"></i></span>
                                             <input asp-for="Input.Password" class="form-control" placeholder="Password" oninput="checkPasswordStrength(this)">
                                             <span class="btn btn-outline-secondary" onclick="showPassword(this)"><i class="bi bi-eye-fill"></i></span>
@@ -71,6 +71,10 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/Identity/Identity.js" asp-append-version="true"></script>
+    <script>
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    </script>
 }
 
 @{/*
