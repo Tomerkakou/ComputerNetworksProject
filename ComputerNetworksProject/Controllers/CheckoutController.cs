@@ -164,7 +164,7 @@ namespace ComputerNetworksProject.Controllers
                 await _db.Orders.AddAsync(order);
                 await _db.SaveChangesAsync();
 
-                await _hub.Clients.All.SendAsync("clearCart", cart.Id);
+                await _hub.Clients.All.SendAsync("clearCart", cart.Id, false);
 
                 HttpContext.Response.Cookies.Delete("cart_id");
                 return RedirectToAction("Completed",new {orderId=order.Id});
