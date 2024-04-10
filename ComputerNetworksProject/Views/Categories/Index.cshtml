@@ -64,10 +64,15 @@
     </div>
 </div>
 
-<script>
-    function deleteCat(categoryId) {
-        console.log(categoryId)
-        var link = document.getElementById("modallink");
-        link.href = `/Categories/Delete?name=${categoryId}`;
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-</script>
+    <script>
+        function deleteCat(categoryId) {
+            console.log(categoryId)
+            var link = document.getElementById("modallink");
+            link.href = `/Categories/Delete?name=${categoryId}`;
+        }
+    </script>
+}
