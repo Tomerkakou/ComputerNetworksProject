@@ -96,7 +96,7 @@ async function decreaseArrow(productId) {
         ClearCart()
         AddError(await res.text())
     }
-    else if (res.status === 400){
+    else if (res.status === 400) {
         window.location.reload(true);
     }
 }
@@ -267,7 +267,7 @@ productsHub.on("cartChanged", async (productId, cartItemAmount, cartItemPrice, c
     }
 
     ChangeInCheckout(cartId);
-    
+
 });
 
 
@@ -290,7 +290,7 @@ productsHub.on("cartItemRemove", async (productId, cartId, cartPrice, cartItemCo
     ChangeInCheckout(cartId);
 })
 
-productsHub.on("clearCart", async (cartId,redirect=true) => {
+productsHub.on("clearCart", async (cartId, redirect = true) => {
     const cartItemContainer = $(`#cartItem-container-${cartId}`)
     if (cartItemContainer.length > 0) {
         const offcanvas = cartItemContainer.parent().parent()
@@ -314,14 +314,14 @@ productsHub.on("clearCart", async (cartId,redirect=true) => {
             location.href = homeUrl;
         }
     }
-    
+
 })
 
 productsHub.on("productPriceChanged", async (cartIds) => {
     var currentUrl = window.location.href;
     for (const cartId of cartIds) {
-        if (currentUrl.includes('Checkout') && currentUrl.includes(`cartId=${cartId}`)){
-            if(currentUrl.includes('Review')) {
+        if (currentUrl.includes('Checkout') && currentUrl.includes(`cartId=${cartId}`)) {
+            if (currentUrl.includes('Review')) {
                 location.reload()
                 return
             }
@@ -329,7 +329,7 @@ productsHub.on("productPriceChanged", async (cartIds) => {
             $("#checkout-next")?.prop("disabled", true)
             $("#checkout-samePayment")?.prop("disabled", true)
             var reviewUrl = currentUrl.replace("Shipping", "Review").replace("Payment", "Review")
-            const html =`Admin changed the price of product in your cart please go back and 
+            const html = `Admin changed the price of product in your cart please go back and 
                         <a class="ms-1 icon-link icon-link-hover" href="${reviewUrl}">
                           Review your cart again
                           <i class="bi bi-arrow-right"></i>
@@ -349,4 +349,3 @@ function rejected() {
 }
 
 productsHub.start().then(fullfilled, rejected)
-
